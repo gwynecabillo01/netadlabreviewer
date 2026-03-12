@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SysAdmin Lab Reviewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0c29;
+    --panel: #1a1a3e;
+    --card: #24245a;
+    --accent: #f72585;
+    --blue: #4cc9f0;
+    --green: #06d6a0;
+    --yellow: #ffd166;
+    --red: #ef233c;
+    --purple: #7b2fff;
+    --text: #e8e8ff;
+    --muted: #9999cc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at 20% 50%, #2d1b6940 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, #1a0a4040 0%, transparent 60%);
+  }
+
+  header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+  }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--blue), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+    font-weight: 600;
+  }
+
+  .score-bar {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 0.8rem 1rem;
+    background: var(--panel);
+    border-bottom: 2px solid var(--purple);
+    flex-wrap: wrap;
+  }
+
+  .score-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+    font-size: 1rem;
+  }
+
+  .score-item .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+
+  .dot-correct { background: var(--green); }
+  .dot-wrong { background: var(--red); }
+  .dot-total { background: var(--blue); }
+
+  .topic-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .topic-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    border: 2px solid var(--card);
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .topic-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .topic-btn.active { background: var(--purple); border-color: var(--purple); color: white; }
+  .topic-btn.done-correct { border-color: var(--green); color: var(--green); }
+  .topic-btn.done-wrong { border-color: var(--red); color: var(--red); }
+
+  .game-area {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1rem 4rem;
+  }
+
+  .topic-header {
+    text-align: center;
+    margin: 1.5rem 0 1rem;
+  }
+
+  .topic-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    letter-spacing: 2px;
+    color: var(--yellow);
+  }
+
+  .topic-header .progress-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+
+  .instructions {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+  }
+
+  .instructions span {
+    color: var(--blue);
+  }
+
+  .match-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .match-container { grid-template-columns: 1fr; }
+  }
+
+  .column-label {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 1rem;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .cards-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .card {
+    background: var(--card);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    line-height: 1.4;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+  }
+
+  .card:hover:not(.locked) {
+    border-color: var(--blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(76, 201, 240, 0.2);
+  }
+
+  .card.selected {
+    border-color: var(--yellow);
+    background: #2a2a60;
+    box-shadow: 0 0 15px rgba(255, 209, 102, 0.3);
+  }
+
+  .card.correct {
+    border-color: var(--green);
+    background: #0a2e22;
+    color: var(--green);
+    cursor: default;
+  }
+
+  .card.wrong {
+    border-color: var(--red);
+    background: #2e0a10;
+    color: var(--red);
+    animation: shake 0.4s ease;
+  }
+
+  .card.locked {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .card.hidden {
+    visibility: hidden;
+  }
+
+  .card .badge {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    font-size: 1rem;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+
+  .card.pop { animation: pop 0.3s ease; }
+
+  .result-banner {
+    text-align: center;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-top: 1rem;
+    display: none;
+  }
+
+  .result-banner.show { display: block; }
+  .result-banner.correct-banner { background: #0a2e22; color: var(--green); border: 2px solid var(--green); }
+  .result-banner.wrong-banner { background: #2e0a10; color: var(--red); border: 2px solid var(--red); }
+
+  .topic-complete {
+    text-align: center;
+    padding: 2rem;
+    background: var(--panel);
+    border-radius: 16px;
+    margin-top: 1rem;
+    border: 2px solid var(--purple);
+    display: none;
+  }
+
+  .topic-complete.show { display: block; }
+
+  .topic-complete h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+  }
+
+  .topic-complete.all-correct h3 { color: var(--green); }
+  .topic-complete.some-wrong h3 { color: var(--yellow); }
+
+  .next-btn {
+    margin-top: 1rem;
+    padding: 0.8rem 2.5rem;
+    background: linear-gradient(135deg, var(--purple), var(--accent));
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .next-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(123, 47, 255, 0.4);
+  }
+
+  .retry-btn {
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
+    padding: 0.8rem 2rem;
+    background: var(--card);
+    color: var(--yellow);
+    border: 2px solid var(--yellow);
+    border-radius: 30px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover { background: var(--yellow); color: #000; }
+
+  .final-screen {
+    text-align: center;
+    padding: 3rem 1rem;
+    display: none;
+  }
+
+  .final-screen.show { display: block; }
+
+  .final-screen h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--yellow), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .final-score {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--blue);
+    margin-top: 1rem;
+  }
+
+  .restart-btn {
+    margin-top: 1.5rem;
+    padding: 1rem 3rem;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .feedback-flash {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    letter-spacing: 4px;
+    z-index: 999;
+    pointer-events: none;
+    transition: transform 0.15s, opacity 0.3s;
+    opacity: 0;
+  }
+
+  .feedback-flash.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  .feedback-flash.hide {
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0;
+  }
+
+  .feedback-flash.correct-flash { color: var(--green); text-shadow: 0 0 30px var(--green); }
+  .feedback-flash.wrong-flash { color: var(--red); text-shadow: 0 0 30px var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SysAdmin Lab Reviewer</h1>
+  <p>Matching Type — Select a Left item, then match it to the correct Right item</p>
+</header>
+
+<div class="score-bar">
+  <div class="score-item"><div class="dot dot-correct"></div> Correct: <span id="scoreCorrect">0</span></div>
+  <div class="score-item"><div class="dot dot-wrong"></div> Wrong: <span id="scoreWrong">0</span></div>
+  <div class="score-item"><div class="dot dot-total"></div> Topic: <span id="scoreTopic">1</span> / 13</div>
+</div>
+
+<div class="topic-nav" id="topicNav"></div>
+
+<div class="game-area" id="gameArea"></div>
+
+<div class="feedback-flash" id="feedbackFlash"></div>
+
+<script>
+const topics = [
+  {
+    title: "1. Hosting a Website on IIS (Windows Server 2022)",
+    pairs: [
+      ["Configure firewall rules to allow HTTP/HTTPS traffic", "Ensure web traffic is not blocked by the firewall"],
+      ["Create a new website", "Set up a site in IIS manager with a unique name and directory"],
+      ["Install the IIS role", "Use Server Manager to add IIS (Internet Information Services)"],
+      ["Assign a static IP address or domain name", "Configure DNS or IP settings for site accessibility"],
+      ["Configure SSL/TLS certificate for HTTPS", "Enable secure HTTPS connections for website"],
+    ]
+  },
+  {
+    title: "2. DHCP Server Dynamically Updating DNS Records",
+    pairs: [
+      ["Navigate to IPv4 properties and select \"DNS\" tab", "Locate the settings to configure DNS updates"],
+      ["Enable \"Dynamically update DNS A and PTR records\"", "Allow DHCP to register client addresses in DNS"],
+      ["Open DHCP Management Console", "Access the DHCP server settings"],
+      ["Verify the setup using ipconfig /registerdns on a client machine", "Ensures the client properly registers its DNS records"],
+      ["Configure DHCP lease duration", "Defines how long an IP address is assigned before renewal"],
+    ]
+  },
+  {
+    title: "3. Setting up a Mail Server",
+    pairs: [
+      ["Create and configure mailboxes", "Assign email addresses to users in Active Directory"],
+      ["Enable POP3/IMAP services", "Allow users to retrieve emails using mail clients"],
+      ["Set up DNS MX records", "Configure Mail Exchanger records for domain-based email routing"],
+      ["Install the Mail Server role or Exchange Server", "Use Server Manager or install Exchange to enable mail services"],
+      ["Configure SMTP settings", "Set up the Simple Mail Transfer Protocol for sending emails"],
+    ]
+  },
+  {
+    title: "4. Setting up a DNS Server",
+    pairs: [
+      ["Configure A (Address) records", "Map domain names to IP addresses"],
+      ["Create a new forward lookup zone", "Define the primary zone to store DNS records"],
+      ["Configure forwarders", "Specify external DNS servers for unresolved queries"],
+      ["Install the DNS Server role", "Use Server Manager to add the DNS role"],
+      ["Set up reverse lookup zone", "Enable DNS to resolve IP addresses back to domain names"],
+    ]
+  },
+  {
+    title: "5. Disabling or Deleting a Former Employee in Active Directory",
+    pairs: [
+      ["Right-click the user and select \"Delete\"", "Permanently removes the user account from AD"],
+      ["Open Active Directory Users and Computers (ADUC)", "Access the AD management console"],
+      ["Right-click the user and select \"Disable Account\"", "Prevents the user from logging in without deleting data"],
+      ["Locate the user account", "Search for the user to be disabled or removed"],
+      ["Move the user to a \"Disabled Users\" OU", "Organizes inactive accounts without deletion"],
+    ]
+  },
+  {
+    title: "6. Centralized Printer Management (Print Server)",
+    pairs: [
+      ["Configure print permissions", "Assign printing rights to users or groups"],
+      ["Install the Print Server role", "Use Server Manager to add Print and Document Services"],
+      ["Add printers to the Print Server", "Register printers in the Print Management Console"],
+      ["Manage print jobs and queues", "Monitor and control print tasks centrally"],
+      ["Set up printer sharing", "Allow network users to access the printers"],
+    ]
+  },
+  {
+    title: "7. DNS Server Setup (Second DNS Set)",
+    pairs: [
+      ["Create a new Forward Lookup Zone", "Enable the server to resolve domain names to IP addresses"],
+      ["Test DNS resolution using (ping/nslookup)", "Verify that domain names are correctly resolving"],
+      ["Configure A (Address) records", "Map domain names to IPv4 addresses"],
+      ["Install the DNS Server role", "Add DNS functionality using Server Manager"],
+      ["Configure a Reverse Lookup Zone", "Enable IP address-to-hostname resolution"],
+    ]
+  },
+  {
+    title: "8. Creating a New User in Active Directory",
+    pairs: [
+      ["Open Active Directory Users and Computers (ADUC)", "Launch the AD management console"],
+      ["Select the appropriate Organizational Unit (OU)", "Choose where the user account will be created"],
+      ["Set up a strong password and enable the account", "Define login credentials and activate the account"],
+      ["Right-click and choose \"New → User\"", "Start the user account creation process"],
+      ["Enter user details like username and full name", "Provide necessary identification information"],
+    ]
+  },
+  {
+    title: "9. Securing a Web Server",
+    pairs: [
+      ["Enable HTTP to HTTPS redirection", "Force users to use secure HTTPS connections"],
+      ["Regularly update the web server software", "Protect against vulnerabilities with patches and updates"],
+      ["Set up user authentication for admin access", "Restrict unauthorized access to website settings"],
+      ["Install an SSL/TLS certificate", "Encrypt web traffic to enhance security"],
+      ["Configure firewall rules", "Restrict access to only necessary ports (e.g. 80, 443)"],
+    ]
+  },
+  {
+    title: "10. Creating New Employee Accounts",
+    pairs: [
+      ["Click on \"New → User\"", "Start the user creation process in ADUC"],
+      ["Set permissions and group membership", "Assign roles, permissions, and group access for the user"],
+      ["Enter user details", "Provide the user's name, username, and login details"],
+      ["Open Active Directory Users and Computers (ADUC)", "Launch the GUI tool to manage user accounts"],
+      ["Select the Organizational Unit (OU)", "Choose the appropriate OU where the user will be placed"],
+    ]
+  },
+  {
+    title: "11. Resetting a Password in Active Directory",
+    pairs: [
+      ["Locate the user account", "Search for the user needing a password reset"],
+      ["Right-click the user and select \"Reset Password\"", "Start the password reset process"],
+      ["Enter a new password and confirm it", "Define a secure new password"],
+      ["Enable \"User must change password at next logon\"", "Force the user to create a new password"],
+      ["Open Active Directory Users and Computers (ADUC)", "Access the user management console"],
+    ]
+  },
+  {
+    title: "12. Setting up a DHCP Server",
+    pairs: [
+      ["Install the DHCP Server role", "Add the DHCP role using Server Manager"],
+      ["Activate and restart the DHCP service", "Ensure the DHCP service is running and available to clients"],
+      ["Set up DHCP reservations for specific devices", "Assign fixed IP addresses to critical devices like printers and servers"],
+      ["Authorize the DHCP Server in Active Directory", "Allow the server to assign IP addresses in an AD environment"],
+      ["Create and configure a new DHCP scope", "Define the range of IP addresses available for clients"],
+    ]
+  },
+  {
+    title: "13. Adding a Computer to an Active Directory Domain",
+    pairs: [
+      ["Restart the computer", "Apply changes and complete the domain join process"],
+      ["Open System Properties", "Access the settings to join a domain"],
+      ["Click \"Change settings\" under Computer Name", "Navigate to domain configuration options"],
+      ["Enter the domain name", "Type the correct AD domain to join"],
+      ["Provide domain admin credentials", "Authenticate with an account that has domain join privileges"],
+    ]
+  },
+];
+
+let currentTopic = 0;
+let selectedLeft = null;
+let matchedCount = 0;
+let correctTotal = 0;
+let wrongTotal = 0;
+let topicResults = new Array(13).fill(null); // null, 'correct', 'wrong'
+let topicWrong = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let shuffledLefts = [];
+let shuffledRights = [];
+let matchState = {}; // leftIdx -> status, rightIdx -> status
+let rightMatchMap = {}; // rightIdx -> leftIdx (correct answer)
+let leftAnswerMap = {}; // leftIdx -> rightIdx (correct answer)
+let currentWrong = 0;
+
+function buildTopicNav() {
+  const nav = document.getElementById('topicNav');
+  nav.innerHTML = '';
+  topics.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'topic-btn' + (i === currentTopic ? ' active' : '');
+    if (topicResults[i] === 'correct') btn.classList.add('done-correct');
+    if (topicResults[i] === 'wrong') btn.classList.add('done-wrong');
+    btn.textContent = `#${i+1}`;
+    btn.title = t.title;
+    btn.onclick = () => { currentTopic = i; loadTopic(); };
+    nav.appendChild(btn);
+  });
+}
+
+function loadTopic() {
+  const topic = topics[currentTopic];
+  selectedLeft = null;
+  matchedCount = 0;
+  currentWrong = 0;
+  matchState = {};
+  rightMatchMap = {};
+  leftAnswerMap = {};
+
+  shuffledLefts = shuffle(topic.pairs.map((p, i) => ({ text: p[0], idx: i })));
+  shuffledRights = shuffle(topic.pairs.map((p, i) => ({ text: p[1], idx: i })));
+
+  // Build answer maps
+  shuffledRights.forEach((r, pos) => {
+    rightMatchMap[pos] = r.idx;
+  });
+  shuffledLefts.forEach((l, pos) => {
+    leftAnswerMap[pos] = l.idx;
+  });
+
+  document.getElementById('scoreTopic').textContent = currentTopic + 1;
+  buildTopicNav();
+
+  const area = document.getElementById('gameArea');
+  area.innerHTML = `
+    <div class="topic-header">
+      <h2>${topic.title}</h2>
+      <div class="progress-label">Match all 5 pairs to complete this topic</div>
+    </div>
+    <div class="instructions">Click a <span>Left</span> card, then click its matching <span>Right</span> card</div>
+    <div class="match-container">
+      <div>
+        <div class="column-label">⬅ LEFT</div>
+        <div class="cards-col" id="leftCol"></div>
+      </div>
+      <div>
+        <div class="column-label">RIGHT ➡</div>
+        <div class="cards-col" id="rightCol"></div>
+      </div>
+    </div>
+    <div class="result-banner" id="resultBanner"></div>
+    <div class="topic-complete" id="topicComplete">
+      <h3 id="completeTitle"></h3>
+      <p id="completeDesc" style="color:var(--muted);font-weight:700;margin-top:0.5rem;"></p>
+      <div style="margin-top:1rem;">
+        <button class="next-btn" onclick="nextTopic()">Next Topic ➡</button>
+        <button class="retry-btn" onclick="loadTopic()">🔄 Retry</button>
+      </div>
+    </div>
+  `;
+
+  renderCards();
+}
+
+function renderCards() {
+  const leftCol = document.getElementById('leftCol');
+  const rightCol = document.getElementById('rightCol');
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
+
+  shuffledLefts.forEach((item, pos) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = `left-${pos}`;
+    card.textContent = item.text;
+    const st = matchState[`left-${pos}`];
+    if (st === 'correct') { card.classList.add('correct', 'locked'); card.innerHTML += '<span class="badge">✅</span>'; }
+    else if (st === 'wrong') { card.classList.add('wrong'); }
+    else if (selectedLeft === pos) { card.classList.add('selected'); }
+    card.onclick = () => handleLeftClick(pos);
+    leftCol.appendChild(card);
+  });
+
+  shuffledRights.forEach((item, pos) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = `right-${pos}`;
+    card.textContent = item.text;
+    const st = matchState[`right-${pos}`];
+    if (st === 'correct') { card.classList.add('correct', 'locked'); card.innerHTML += '<span class="badge">✅</span>'; }
+    else if (st === 'wrong') { card.classList.add('wrong'); }
+    card.onclick = () => handleRightClick(pos);
+    rightCol.appendChild(card);
+  });
+}
+
+function handleLeftClick(pos) {
+  if (matchState[`left-${pos}`] === 'correct') return;
+  selectedLeft = pos;
+  renderCards();
+}
+
+function handleRightClick(pos) {
+  if (selectedLeft === null) return;
+  if (matchState[`right-${pos}`] === 'correct') return;
+
+  const leftItem = shuffledLefts[selectedLeft];
+  const rightItem = shuffledRights[pos];
+
+  if (leftItem.idx === rightItem.idx) {
+    // Correct!
+    matchState[`left-${selectedLeft}`] = 'correct';
+    matchState[`right-${pos}`] = 'correct';
+    matchedCount++;
+    correctTotal++;
+    document.getElementById('scoreCorrect').textContent = correctTotal;
+    showFlash('✔ CORRECT!', 'correct-flash');
+    selectedLeft = null;
+    renderCards();
+    if (matchedCount === topics[currentTopic].pairs.length) {
+      setTimeout(showTopicComplete, 400);
+    }
+  } else {
+    // Wrong!
+    matchState[`left-${selectedLeft}`] = 'wrong';
+    matchState[`right-${pos}`] = 'wrong';
+    currentWrong++;
+    wrongTotal++;
+    document.getElementById('scoreWrong').textContent = wrongTotal;
+    showFlash('✘ WRONG!', 'wrong-flash');
+    renderCards();
+    setTimeout(() => {
+      delete matchState[`left-${selectedLeft}`];
+      delete matchState[`right-${pos}`];
+      selectedLeft = null;
+      renderCards();
+    }, 800);
+  }
+}
+
+function showFlash(text, cls) {
+  const el = document.getElementById('feedbackFlash');
+  el.textContent = text;
+  el.className = 'feedback-flash ' + cls + ' show';
+  setTimeout(() => {
+    el.classList.remove('show');
+    el.classList.add('hide');
+    setTimeout(() => { el.className = 'feedback-flash'; }, 300);
+  }, 700);
+}
+
+function showTopicComplete() {
+  const banner = document.getElementById('topicComplete');
+  const title = document.getElementById('completeTitle');
+  const desc = document.getElementById('completeDesc');
+  banner.classList.add('show');
+  if (currentWrong === 0) {
+    banner.classList.add('all-correct');
+    title.textContent = '🎉 PERFECT!';
+    desc.textContent = 'All pairs matched correctly!';
+    topicResults[currentTopic] = 'correct';
+  } else {
+    banner.classList.add('some-wrong');
+    title.textContent = '✅ COMPLETED';
+    desc.textContent = `You made ${currentWrong} mistake${currentWrong > 1 ? 's' : ''}. Try again for a perfect score!`;
+    topicResults[currentTopic] = 'wrong';
+  }
+  buildTopicNav();
+  if (currentTopic === topics.length - 1) {
+    document.querySelector('.next-btn').textContent = '🏁 See Final Score';
+  }
+}
+
+function nextTopic() {
+  if (currentTopic < topics.length - 1) {
+    currentTopic++;
+    loadTopic();
+  } else {
+    showFinalScreen();
+  }
+}
+
+function showFinalScreen() {
+  const area = document.getElementById('gameArea');
+  const perfect = topicResults.filter(r => r === 'correct').length;
+  area.innerHTML = `
+    <div class="final-screen show">
+      <h2>🏁 GAME COMPLETE!</h2>
+      <div class="final-score">
+        ✅ Correct Matches: ${correctTotal}<br>
+        ❌ Wrong Attempts: ${wrongTotal}<br>
+        🏆 Perfect Topics: ${perfect} / 13
+      </div>
+      <div style="margin-top:1rem;color:var(--muted);font-weight:700;">
+        ${perfect === 13 ? '🌟 PERFECT SCORE! You are ready for the exam! 🌟' : `Keep practicing! You got ${perfect} topics perfectly.`}
+      </div>
+      <button class="restart-btn" onclick="restartGame()">🔄 Play Again</button>
+    </div>
+  `;
+}
+
+function restartGame() {
+  currentTopic = 0;
+  correctTotal = 0;
+  wrongTotal = 0;
+  topicResults = new Array(13).fill(null);
+  document.getElementById('scoreCorrect').textContent = 0;
+  document.getElementById('scoreWrong').textContent = 0;
+  loadTopic();
+}
+
+// Init
+loadTopic();
+</script>
+</body>
+</html>
