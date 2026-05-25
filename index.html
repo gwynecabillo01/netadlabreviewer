@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Information Security Quizlet</title>
+    <title>Instant Feedback Quizlet</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -15,6 +14,7 @@
             --correct-border: #c3e6cb;
             --wrong-bg: #f8d7da;
             --wrong-border: #f5c6cb;
+            --disabled-bg: #fdfdfd;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -32,12 +32,31 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 2px solid var(--accent-color);
             padding-bottom: 10px;
             margin-bottom: 30px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding-top: 10px;
+        }
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.5em;
+        }
+        .score-board {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--accent-color);
+            background: #eef7fc;
+            padding: 5px 15px;
+            border-radius: 20px;
         }
         .question-block {
             margin-bottom: 30px;
@@ -63,73 +82,76 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .option-label:hover {
+        .option-label:not(.disabled):hover {
             background: #e9ecef;
+        }
+        .option-label.disabled {
+            cursor: default;
+            opacity: 0.8;
         }
         input[type="radio"] {
             margin-right: 10px;
             transform: scale(1.2);
-        }
-        button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
-            color: #fff;
-            background-color: var(--accent-color);
-            border: none;
-            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 30px;
         }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .result-box {
-            display: none;
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            background: var(--primary-color);
-            color: #fff;
-            border-radius: 8px;
-            font-size: 1.5em;
+        input[type="radio"]:disabled {
+            cursor: default;
         }
         .option-label.correct {
-            background-color: var(--correct-bg);
-            border-color: var(--correct-border);
+            background-color: var(--correct-bg) !important;
+            border-color: var(--correct-border) !important;
             color: #155724;
             font-weight: bold;
         }
         .option-label.wrong {
-            background-color: var(--wrong-bg);
-            border-color: var(--wrong-border);
+            background-color: var(--wrong-bg) !important;
+            border-color: var(--wrong-border) !important;
             color: #721c24;
         }
         .explanation {
             display: none;
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #666;
-            font-style: italic;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.95em;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--accent-color);
+        }
+        .progress-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Information Security Final Exam Quizlet</h1>
+    <div class="header-section">
+        <h1>Information Security Practice</h1>
+        <div class="score-board">Score: <span id="current-score">0</span> / <span id="answered-count">0</span></div>
+    </div>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
     <div id="quiz-container"></div>
-    <button id="submit-btn" onclick="gradeQuiz()">Submit & Grade Quiz</button>
-    <div id="result" class="result-box"></div>
 </div>
 
 <script>
-    const quizData = [{"q": "1. It protects information even when it is not under your physical control.", "options": ["Cryptanalysis", "File Encryption", "Cryptography", "File Decryption"], "answer": 2}, {"q": "2. Cipher designers often start as _____ that help users recognize weaknesses.", "options": ["hacker", "system analyst", "cryptanalyst", "crypto analyst"], "answer": 2}, {"q": "3. It is a type of cryptanalysis that is common but most difficult in situation.", "options": ["Chosen Plaintext", "Known Plaintext", "Known Ciphertext", "Both B and C"], "answer": 2}, {"q": "4. It is a type of cryptanalysis where users have the option to match some of the ciphertext encrypted with a particular key.", "options": ["Known Ciphertext", "Chosen Plaintext", "Known Plaintext", "Both A and B"], "answer": 2}, {"q": "5. It is a type of cryptanalysis where users have the option to select some plaintext to encipher with our victim's cipher and retrieve the ciphertext.", "options": ["Known Plaintext", "Known Ciphertext Only", "None of the choices", "Chosen Plaintext"], "answer": 2}, {"q": "6. Using the Caesar Cipher, replace each letter in a text with the 7th letter following it in the alphabet: HEART substituted to _____", "options": ["NKGXZ", "PMIZB", "OLHYA", "QRSTU"], "answer": 2}, {"q": "7. Using the Caesar Cipher, replace each letter in a text with the 5th letter following it in the alphabet: COMPUTER substituted to _____", "options": ["RETUPMOC", "WJYZURTE", "ETRUZYJW", "GSQTYXIV"], "answer": 2}, {"q": "8. Using the Caesar Cipher, replace each letter in a text with the 3rd letter following it in the alphabet: SECURITY substituted to _____", "options": ["AVKTWEGU", "BWLUXFHV", "VHFXULWB", "UGEWTKVA"], "answer": 2}, {"q": "9. It is a type of cipher that is named after the 16th century author which uses a series of different rotations.", "options": ["Shift cipher", "Caesar cipher", "Vigenere cipher", "None of the choices"], "answer": 2}, {"q": "10. Encrypt for the substituted value of INFORMATION TECHNOLOGY.", "options": ["KLFQXJOLCKF VDLILKEZBQ", "VDLILKEZBQ KLFQXJOLCKF", "FKCLOJXQFLK QBZEKLILDV", "QBZEKLILDV FKCLOJXQFLK"], "answer": 2}, {"q": "11. Encrypt for the substituted value of SOUTH KOREA. (Cipher key provided in image)", "options": ["XBOLH EQRLP", "PLRQE HLOBX", "HLOBX PLRQE", "EQRLP XBOLH"], "answer": 2}, {"q": "12. Encrypt for the substituted value of PHILIPPINES. (Cipher key provided in image)", "options": ["PBKFMMFIFEM", "MEFIFMMFKBP", "SKLOLSSLQHV", "VHQLSSLOLKS"], "answer": 1}, {"q": "13. Decrypt the substituted value of OLKFKX ZXLFIF. (Cipher key provided in image)", "options": ["ALEXIE BALLON", "RONINA CAOILI", "IMELDA MARCOS", "WILIAM CORTEZ"], "answer": 1}, {"q": "14. Decrypt the substituted value of F TFII MXPP. (Cipher key provided in image)", "options": ["I WILL FAIL", "I WILL PASS", "I MISS QUIZ", "I SKIP EXAM"], "answer": 1}, {"q": "15. This refers to a small enclosure that has an entry point and a different exit point.", "options": ["Electronic monitoring", "Mantraps", "Alarms and alarm systems", "Computer rooms and wiring closets"], "answer": 1}, {"q": "16. This threat occurs when an unauthorized individual follows an authorized user through the control.", "options": ["Sniffing", "Tailgating", "Hacking", "Interrupting"], "answer": 1}, {"q": "17. It requires a unique set of skills and a thorough understanding of a broad body of specialized knowledge.", "options": ["Information Management", "Project Management", "Computer Assurance", "Information Security"], "answer": 1}, {"q": "18. _____ solution is to designate a suitable person from the information security community of interest.", "options": ["Minimal", "Optimal", "Normal", "Actual"], "answer": 1}, {"q": "19. Project _____ is usually handled as a procedural task and assigned to a mid-level IT or information security manager.", "options": ["documentation", "wrap-up", "report", "presentation"], "answer": 1}, {"q": "20. _____ refers to an organization that has come to expect change as a necessary part of organizational culture and embracing change is more productive than fighting it.", "options": ["Outsourcing", "Resilience", "Resistance", "Technology governance"], "answer": 1}, {"q": "21. _____ are a complex process an organization uses to manage impact and costs from technology implementation, innovation, and obsolescence.", "options": ["Technology governance", "Resistance", "Outsourcing", "Resilience"], "answer": 0}, {"q": "22. This refers to areas of the ISO model that identify, track, diagnose, and resolve faults in a system.", "options": ["Fault management", "Accounting and auditing management", "Configuration and change management", "Performance management"], "answer": 0}, {"q": "23. It is one of the areas of the ISO model that refers to the administration of the configuration of security program components.", "options": ["Configuration management", "Fault management", "Auditing management", "Change management"], "answer": 0}, {"q": "24. It is one of the areas of the ISO model that refers to the administration of changes in strategy, operation, or components.", "options": ["Change management", "Fault management", "Auditing, management", "Configuration management"], "answer": 0}, {"q": "25. _____ manager should maintain a master copy of each document, record, and archive revisions made, and keep copies of revisions.", "options": ["Document", "System", "Project", "IT"], "answer": 0}, {"q": "26. _____ revisions not implemented and enforceable until they have been disseminated, read, understood, and agreed to.", "options": ["Policy", "Document", "Software", "Technical"], "answer": 0}, {"q": "27. _____ available to make creation, modification, dissemination, and agreement documentation processes more manageable.", "options": ["Software", "Document", "Technical", "Policy"], "answer": 0}, {"q": "28. _____ accounting enables organizations to internally charge for system use.", "options": ["Chargeback", "Resource", "Work Breakdown Structure (WBS)", "Management"], "answer": 0}, {"q": "29. _____ management involves monitoring use of a particular component of a system.", "options": ["Accounting", "Auditing", "Chargeback", "Configuration"], "answer": 0}, {"q": "30. This refers to a process of reviewing the use of a system, not to check performance, but to determine misuse or malfeasance; automated tools can assist:", "options": ["Auditing", "Chargeback", "Accounting", "Configuration"], "answer": 0}, {"q": "31. _____ five-area-based framework supports a structured management model by ensuring various areas are addressed.", "options": ["Bull's eye model", "Logical", "CISO", "ISO"], "answer": 3}, {"q": "32. What are the four (4) process models introduced by Part 2 of the British Standard (BS) 7799?", "options": ["Plan, Do, Configure, Act", "Plan, Do, Chance, Instruct", "Plan, Manage, Instruct, Check", "Plan, Do, Check, Act"], "answer": 3}, {"q": "33. _____ monitoring collects raw intelligence, filters for relevance, assigns a relative risk impact, and communicates to decision-makers in time to make a difference.", "options": ["Internal", "Data", "Project", "External"], "answer": 3}, {"q": "34. _____ must be translated into a description of risk that is caused by change through operational risk assessment.", "options": ["Primary value", "Intelligence", "Safety", "Awareness"], "answer": 3}, {"q": "35. _____ identifies and documents risk that the project, process, or action introduces to the organization and offers suggestions for controls.", "options": ["Computer assurance", "Information security", "Project management", "Risk assessment"], "answer": 3}, {"q": "36. _____ group coordinates the preparation of many types of risk assessment documents.", "options": ["Document analysts", "Project management", "Computer assurance", "Information security"], "answer": 3}, {"q": "37. _____ refers to the identification of specific, documented vulnerabilities and their timely remediation.", "options": ["Primary value", "Primary awareness", "Primary tracking", "Primary goal"], "answer": 3}, {"q": "38. _____ are often internal members of organizations, affiliates or business partners, or automated attack vectors.", "options": ["Intruders", "Hackers", "Sniffers", "Attackers"], "answer": 3}, {"q": "39. _____ is a process that uses scripted dialing attacks against a pool of phone numbers.", "options": ["Attackers", "Intruders", "Sniffing tool", "War dialing"], "answer": 3}, {"q": "40. _____ tracking database should provide details as well as a link to the information assets.", "options": ["Remediation", "Risk", "Low cost", "Vulnerability"], "answer": 3}, {"q": "41. _____ must be assured that decisions made to assume risk to the organization are made by properly informed decision-makers.", "options": ["Management", "Security", "Configuration", "Acceptance"], "answer": 0}, {"q": "42. _____ is used to investigate what happened during the attack on assets and how the attack occurred.", "options": ["Evidentiary material", "Digital forensics", "Traditional forensics", "Primary goal"], "answer": 1}, {"q": "43. _____ is any information that could potentially support the organization's legal or policy-based case against the suspect.", "options": ["Traditional forensics", "Primary goal", "Evidentiary material", "Digital forensics"], "answer": 2}, {"q": "44. _____ depends on the organization adopting a team approach to remediation in place of cross-organizational push and pull.", "options": ["Objective", "Relationship", "Dream", "Success"], "answer": 3}, {"q": "45. _____ is to repair flaw causing vulnerability instance or remove the risk associated with vulnerability.", "options": ["Objective", "Relationship", "Dream", "Success"], "answer": 0}, {"q": "46. It is a procedure that compares the current state of the network segment against the known previous state of the same segment.", "options": ["Baseline state", "Difference analysis", "Intrusion detection systems", "Automated difference"], "answer": 1}, {"q": "47. A type of employment process that should be conducted before the organization extends offers to candidates in a level of detail and depth with which candidates are examined.", "options": ["New Hire Orientation", "Employment Contracts", "Background Checks", "Evaluating Performance"], "answer": 2}, {"q": "48. A type of employee that is hired by an organization to serve an impermanent position or to supplement the existing workforce where the supervisor must restrict the information to which access is possible.", "options": ["Contract Employees", "Consultants", "Business Partners", "Temporary Employees"], "answer": 3}, {"q": "49. It is known as a decoy system that is designed to lure potential attackers away from critical systems and encourage attacks against themselves.", "options": ["Honeynets", "Honeycombs", "Padded Cell", "Honeypots"], "answer": 3}, {"q": "50. It is a type of authentication factor that is something a supplicant knows, which refers to a series of characters that is typically longer than a password from which a virtual password is derived.", "options": ["Password", "Token", "User ID", "Passphrase"], "answer": 3}, {"q": "51. What is the course code of Computer Security and Information Assurance?", "options": ["IT26211", "IT26212", "IT26213", "IT26214"], "answer": 3}];
+    const quizData = [{"q": "1. It protects information even when it is not under your physical control.", "options": ["Cryptanalysis", "File Encryption", "Cryptography", "File Decryption"], "answer": 2}, {"q": "2. Cipher designers often start as _____ that help users recognize weaknesses.", "options": ["hacker", "system analyst", "cryptanalyst", "crypto analyst"], "answer": 2}, {"q": "3. It is a type of cryptanalysis that is common but most difficult in situation.", "options": ["Chosen Plaintext", "Known Plaintext", "Known Ciphertext", "Both B and C"], "answer": 2}, {"q": "4. It is a type of cryptanalysis where users have the option to match some of the ciphertext encrypted with a particular key.", "options": ["Known Ciphertext", "Chosen Plaintext", "Known Plaintext", "Both A and B"], "answer": 2}, {"q": "5. It is a type of cryptanalysis where users have the option to select some plaintext to encipher with our victim's cipher and retrieve the ciphertext.", "options": ["Known Plaintext", "Known Ciphertext Only", "None of the choices", "Chosen Plaintext"], "answer": 2}, {"q": "6. Using the Caesar Cipher, replace each letter in a text with the 7th letter following it in the alphabet: HEART substituted to _____", "options": ["NKGXZ", "PMIZB", "OLHYA", "QRSTU"], "answer": 2}, {"q": "7. Using the Caesar Cipher, replace each letter in a text with the 5th letter following it in the alphabet: COMPUTER substituted to _____", "options": ["RETUPMOC", "WJYZURTE", "ETRUZYJW", "GSQTYXIV"], "answer": 2}, {"q": "8. Using the Caesar Cipher, replace each letter in a text with the 3rd letter following it in the alphabet: SECURITY substituted to _____", "options": ["AVKTWEGU", "BWLUXFHV", "VHFXULWB", "UGEWTKVA"], "answer": 2}, {"q": "9. It is a type of cipher that is named after the 16th century author which uses a series of different rotations.", "options": ["Shift cipher", "Caesar cipher", "Vigenere cipher", "None of the choices"], "answer": 2}, {"q": "10. Encrypt for the substituted value of INFORMATION TECHNOLOGY.", "options": ["KLFQXJOLCKF VDLILKEZBQ", "VDLILKEZBQ KLFQXJOLCKF", "FKCLOJXQFLK QBZEKLILDV", "QBZEKLILDV FKCLOJXQFLK"], "answer": 2}, {"q": "11. Encrypt for the substituted value of SOUTH KOREA.", "options": ["XBOLH EQRLP", "PLRQE HLOBX", "HLOBX PLRQE", "EQRLP XBOLH"], "answer": 2}, {"q": "12. Encrypt for the substituted value of PHILIPPINES.", "options": ["PBKFMMFIFEM", "MEFIFMMFKBP", "SKLOLSSLQHV", "VHQLSSLOLKS"], "answer": 1}, {"q": "13. Decrypt the substituted value of OLKFKX ZXLFIF.", "options": ["ALEXIE BALLON", "RONINA CAOILI", "IMELDA MARCOS", "WILIAM CORTEZ"], "answer": 1}, {"q": "14. Decrypt the substituted value of F TFII MXPP.", "options": ["I WILL FAIL", "I WILL PASS", "I MISS QUIZ", "I SKIP EXAM"], "answer": 1}, {"q": "15. This refers to a small enclosure that has an entry point and a different exit point.", "options": ["Electronic monitoring", "Mantraps", "Alarms and alarm systems", "Computer rooms and wiring closets"], "answer": 1}, {"q": "16. This threat occurs when an unauthorized individual follows an authorized user through the control.", "options": ["Sniffing", "Tailgating", "Hacking", "Interrupting"], "answer": 1}, {"q": "17. It requires a unique set of skills and a thorough understanding of a broad body of specialized knowledge.", "options": ["Information Management", "Project Management", "Computer Assurance", "Information Security"], "answer": 1}, {"q": "18. _____ solution is to designate a suitable person from the information security community of interest.", "options": ["Minimal", "Optimal", "Normal", "Actual"], "answer": 1}, {"q": "19. Project _____ is usually handled as a procedural task and assigned to a mid-level IT or information security manager.", "options": ["documentation", "wrap-up", "report", "presentation"], "answer": 1}, {"q": "20. _____ refers to an organization that has come to expect change as a necessary part of organizational culture and embracing change is more productive than fighting it.", "options": ["Outsourcing", "Resilience", "Resistance", "Technology governance"], "answer": 1}, {"q": "21. _____ are a complex process an organization uses to manage impact and costs from technology implementation, innovation, and obsolescence.", "options": ["Technology governance", "Resistance", "Outsourcing", "Resilience"], "answer": 0}, {"q": "22. This refers to areas of the ISO model that identify, track, diagnose, and resolve faults in a system.", "options": ["Fault management", "Accounting and auditing management", "Configuration and change management", "Performance management"], "answer": 0}, {"q": "23. It is one of the areas of the ISO model that refers to the administration of the configuration of security program components.", "options": ["Configuration management", "Fault management", "Auditing management", "Change management"], "answer": 0}, {"q": "24. It is one of the areas of the ISO model that refers to the administration of changes in strategy, operation, or components.", "options": ["Change management", "Fault management", "Auditing, management", "Configuration management"], "answer": 0}, {"q": "25. _____ manager should maintain a master copy of each document, record, and archive revisions made, and keep copies of revisions.", "options": ["Document", "System", "Project", "IT"], "answer": 0}, {"q": "26. _____ revisions not implemented and enforceable until they have been disseminated, read, understood, and agreed to.", "options": ["Policy", "Document", "Software", "Technical"], "answer": 0}, {"q": "27. _____ available to make creation, modification, dissemination, and agreement documentation processes more manageable.", "options": ["Software", "Document", "Technical", "Policy"], "answer": 0}, {"q": "28. _____ accounting enables organizations to internally charge for system use.", "options": ["Chargeback", "Resource", "Work Breakdown Structure (WBS)", "Management"], "answer": 0}, {"q": "29. _____ management involves monitoring use of a particular component of a system.", "options": ["Accounting", "Auditing", "Chargeback", "Configuration"], "answer": 0}, {"q": "30. This refers to a process of reviewing the use of a system, not to check performance, but to determine misuse or malfeasance; automated tools can assist:", "options": ["Auditing", "Chargeback", "Accounting", "Configuration"], "answer": 0}, {"q": "31. _____ five-area-based framework supports a structured management model by ensuring various areas are addressed.", "options": ["Bull's eye model", "Logical", "CISO", "ISO"], "answer": 3}, {"q": "32. What are the four (4) process models introduced by Part 2 of the British Standard (BS) 7799?", "options": ["Plan, Do, Configure, Act", "Plan, Do, Chance, Instruct", "Plan, Manage, Instruct, Check", "Plan, Do, Check, Act"], "answer": 3}, {"q": "33. _____ monitoring collects raw intelligence, filters for relevance, assigns a relative risk impact, and communicates to decision-makers in time to make a difference.", "options": ["Internal", "Data", "Project", "External"], "answer": 3}, {"q": "34. _____ must be translated into a description of risk that is caused by change through operational risk assessment.", "options": ["Primary value", "Intelligence", "Safety", "Awareness"], "answer": 3}, {"q": "35. _____ identifies and documents risk that the project, process, or action introduces to the organization and offers suggestions for controls.", "options": ["Computer assurance", "Information security", "Project management", "Risk assessment"], "answer": 3}, {"q": "36. _____ group coordinates the preparation of many types of risk assessment documents.", "options": ["Document analysts", "Project management", "Computer assurance", "Information security"], "answer": 3}, {"q": "37. _____ refers to the identification of specific, documented vulnerabilities and their timely remediation.", "options": ["Primary value", "Primary awareness", "Primary tracking", "Primary goal"], "answer": 3}, {"q": "38. _____ are often internal members of organizations, affiliates or business partners, or automated attack vectors.", "options": ["Intruders", "Hackers", "Sniffers", "Attackers"], "answer": 3}, {"q": "39. _____ is a process that uses scripted dialing attacks against a pool of phone numbers.", "options": ["Attackers", "Intruders", "Sniffing tool", "War dialing"], "answer": 3}, {"q": "40. _____ tracking database should provide details as well as a link to the information assets.", "options": ["Remediation", "Risk", "Low cost", "Vulnerability"], "answer": 3}, {"q": "41. _____ must be assured that decisions made to assume risk to the organization are made by properly informed decision-makers.", "options": ["Management", "Security", "Configuration", "Acceptance"], "answer": 0}, {"q": "42. _____ is used to investigate what happened during the attack on assets and how the attack occurred.", "options": ["Evidentiary material", "Digital forensics", "Traditional forensics", "Primary goal"], "answer": 1}, {"q": "43. _____ is any information that could potentially support the organization's legal or policy-based case against the suspect.", "options": ["Traditional forensics", "Primary goal", "Evidentiary material", "Digital forensics"], "answer": 2}, {"q": "44. _____ depends on the organization adopting a team approach to remediation in place of cross-organizational push and pull.", "options": ["Objective", "Relationship", "Dream", "Success"], "answer": 3}, {"q": "45. _____ is to repair flaw causing vulnerability instance or remove the risk associated with vulnerability.", "options": ["Objective", "Relationship", "Dream", "Success"], "answer": 0}, {"q": "46. It is a procedure that compares the current state of the network segment against the known previous state of the same segment.", "options": ["Baseline state", "Difference analysis", "Intrusion detection systems", "Automated difference"], "answer": 1}, {"q": "47. A type of employment process that should be conducted before the organization extends offers to candidates in a level of detail and depth with which candidates are examined.", "options": ["New Hire Orientation", "Employment Contracts", "Background Checks", "Evaluating Performance"], "answer": 2}, {"q": "48. A type of employee that is hired by an organization to serve an impermanent position or to supplement the existing workforce where the supervisor must restrict the information to which access is possible.", "options": ["Contract Employees", "Consultants", "Business Partners", "Temporary Employees"], "answer": 3}, {"q": "49. It is known as a decoy system that is designed to lure potential attackers away from critical systems and encourage attacks against themselves.", "options": ["Honeynets", "Honeycombs", "Padded Cell", "Honeypots"], "answer": 3}, {"q": "50. It is a type of authentication factor that is something a supplicant knows, which refers to a series of characters that is typically longer than a password from which a virtual password is derived.", "options": ["Password", "Token", "User ID", "Passphrase"], "answer": 3}, {"q": "51. What is the course code of Computer Security and Information Assurance?", "options": ["IT26211", "IT26212", "IT26213", "IT26214"], "answer": 3}];
     const quizContainer = document.getElementById('quiz-container');
-    const resultBox = document.getElementById('result');
-    const submitBtn = document.getElementById('submit-btn');
+    let score = 0;
+    let answered = 0;
 
     function renderQuiz() {
         quizData.forEach((item, qIndex) => {
@@ -154,6 +176,9 @@
                 radio.type = 'radio';
                 radio.name = `q${qIndex}`;
                 radio.value = oIndex;
+                
+                // Add event listener for instant feedback
+                radio.addEventListener('change', () => handleSelection(qIndex, oIndex));
 
                 label.appendChild(radio);
                 label.appendChild(document.createTextNode(opt));
@@ -164,7 +189,6 @@
             const explanation = document.createElement('div');
             explanation.className = 'explanation';
             explanation.id = `expl-q${qIndex}`;
-            explanation.innerHTML = `<strong>Correct Answer:</strong> ${item.options[item.answer]}`;
 
             qBlock.appendChild(optionsList);
             qBlock.appendChild(explanation);
@@ -172,39 +196,47 @@
         });
     }
 
-    function gradeQuiz() {
-        let score = 0;
+    function handleSelection(qIndex, selectedIndex) {
+        const item = quizData[qIndex];
+        const correctIndex = item.answer;
+        const expl = document.getElementById(`expl-q${qIndex}`);
         
-        quizData.forEach((item, qIndex) => {
-            const selected = document.querySelector(`input[name="q${qIndex}"]:checked`);
-            const correctIndex = item.answer;
-            const correctLabel = document.getElementById(`label-q${qIndex}-o${correctIndex}`);
-            const expl = document.getElementById(`expl-q${qIndex}`);
-            
-            // Reset colors
-            for(let i=0; i<item.options.length; i++) {
-                document.getElementById(`label-q${qIndex}-o${i}`).classList.remove('correct', 'wrong');
-            }
-            
-            // Always highlight correct answer
-            correctLabel.classList.add('correct');
-            expl.style.display = 'block';
+        let isCorrect = (selectedIndex === correctIndex);
+        
+        if (isCorrect) {
+            score++;
+        }
+        answered++;
+        
+        // Update scoreboard and progress
+        document.getElementById('current-score').textContent = score;
+        document.getElementById('answered-count').textContent = answered;
+        document.getElementById('progress-fill').style.width = `${(answered / quizData.length) * 100}%`;
 
-            if (selected) {
-                const userIndex = parseInt(selected.value);
-                if (userIndex === correctIndex) {
-                    score++;
-                } else {
-                    const wrongLabel = document.getElementById(`label-q${qIndex}-o${userIndex}`);
-                    wrongLabel.classList.add('wrong');
-                }
-            }
-        });
+        // Disable all options for this question and show colors
+        for(let i=0; i<item.options.length; i++) {
+            const radio = document.querySelector(`input[name="q${qIndex}"][value="${i}"]`);
+            const label = document.getElementById(`label-q${qIndex}-o${i}`);
+            
+            radio.disabled = true;
+            label.classList.add('disabled');
 
-        resultBox.style.display = 'block';
-        resultBox.innerHTML = `You scored ${score} out of ${quizData.length}!<br><span style="font-size: 0.6em; font-weight: normal;">Scroll up to review your answers.</span>`;
-        submitBtn.style.display = 'none';
-        window.scrollTo(0, document.body.scrollHeight);
+            if (i === correctIndex) {
+                label.classList.add('correct');
+            } else if (i === selectedIndex && !isCorrect) {
+                label.classList.add('wrong');
+            }
+        }
+
+        // Show feedback text
+        expl.style.display = 'block';
+        if (isCorrect) {
+            expl.style.borderLeftColor = '#28a745';
+            expl.innerHTML = `<strong>Correct!</strong> The answer is ${item.options[correctIndex]}.`;
+        } else {
+            expl.style.borderLeftColor = '#dc3545';
+            expl.innerHTML = `<strong>Incorrect.</strong> The correct answer is <strong>${item.options[correctIndex]}</strong>.`;
+        }
     }
 
     renderQuiz();
