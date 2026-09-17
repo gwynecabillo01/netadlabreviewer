@@ -14,6 +14,7 @@
             --correct: #28a745;
             --wrong: #dc3545;
             --option-bg: #0f3460;
+            --block-bg: rgba(0, 0, 0, 0.2);
         }
 
         body {
@@ -21,9 +22,9 @@
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
             min-height: 100vh;
         }
 
@@ -33,22 +34,43 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             max-width: 800px;
-            width: 90%;
-            text-align: center;
+            width: 100%;
         }
 
-        h2#question-text {
-            font-size: 1.5rem;
-            margin-bottom: 25px;
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .question-block {
+            background-color: var(--block-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 20px;
             line-height: 1.4;
             white-space: pre-wrap;
-            text-align: left;
+        }
+
+        .instruction {
+            font-size: 0.9rem;
+            color: #f39c12;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
 
         .options-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 15px;
+            gap: 12px;
         }
 
         .option-btn {
@@ -56,15 +78,16 @@
             color: var(--text);
             border: 2px solid transparent;
             padding: 15px 20px;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: left;
+            width: 100%;
         }
 
         .option-btn:hover:not(:disabled) {
-            transform: scale(1.02);
+            transform: scale(1.01);
             border-color: var(--primary);
         }
 
@@ -74,85 +97,86 @@
         }
 
         .option-btn.correct {
-            background-color: var(--correct);
-            border-color: var(--correct);
+            background-color: var(--correct) !important;
+            border-color: var(--correct) !important;
+            color: white;
         }
 
         .option-btn.wrong {
-            background-color: var(--wrong);
-            border-color: var(--wrong);
+            background-color: var(--wrong) !important;
+            border-color: var(--wrong) !important;
+            color: white;
+            opacity: 0.8;
         }
 
         .option-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.9;
-        }
-
-        .controls {
-            margin-top: 25px;
-            display: none; /* Hidden by default, shown for multi-select or next question */
+            cursor: default;
         }
 
         .action-btn {
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 15px 30px;
             font-size: 1.2rem;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            margin: 10px;
         }
 
         .action-btn:hover {
             background-color: var(--primary-hover);
         }
-
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #aaa;
+        
+        .check-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #f39c12;
+            margin-left: 0;
         }
 
-        #end-screen {
+        .check-btn:hover {
+            background-color: #d68910;
+        }
+
+        #results-area {
             display: none;
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid var(--primary);
+        }
+
+        #score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #f39c12;
         }
     </style>
 </head>
 <body>
 
-    <div class="quiz-container" id="quiz-screen">
-        <div class="status-bar">
-            <span id="progress-text">Question 1 / 10</span>
-            <span id="retry-status" style="color: #f39c12; display: none;">Retry Mode</span>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>Comprehensive Quiz</h1>
+            <p>Select an answer to see immediate feedback. Complete all questions to see your final score at the bottom!</p>
         </div>
-        <h2 id="question-text">Question goes here...</h2>
-        <div class="options-grid" id="options-container">
-            <!-- Options generated here -->
-        </div>
-        <div class="controls" id="controls-container">
-            <button class="action-btn" id="submit-btn" onclick="submitMultiAnswer()">Submit Answer</button>
-        </div>
-    </div>
 
-    <div class="quiz-container" id="end-screen">
-        <h2>Round Complete!</h2>
-        <p id="end-message" style="font-size: 1.2rem; margin-bottom: 20px;"></p>
-        <button class="action-btn" id="next-round-btn" onclick="startRetryRound()">Retry Wrong Questions</button>
+        <div id="questions-container">
+            <!-- All questions will be injected here -->
+        </div>
+
+        <div id="results-area">
+            <div id="score-display"></div>
+            <button class="action-btn" id="show-wrong-btn" onclick="showWrongAnswers()" style="display: none; background-color: #dc3545;">Show Only Mistakes</button>
+            <button class="action-btn" id="retry-btn" onclick="location.reload()">Restart Quiz</button>
+        </div>
     </div>
 
     <script>
-        /* 
-        ========================================================
-        EASY CONFIGURATION AREA
-        To change the correct answer, update the "correctAnswers" array.
-        Note: Options are numbered starting from 0. 
-        So if the 2nd option is correct, write correctAnswers: [1].
-        If multiple answers are correct, write correctAnswers: [0, 3] etc.
-        ========================================================
-        */
         const masterQuestionsList = [
             {
                 question: "A data pipeline defines a global variable tax_rate = 0.08 alongside a modular invoice calculation function...\nWhich statements correctly explain variable scope behavior and data structure properties in this architecture? (Select ALL that apply)",
@@ -301,15 +325,12 @@
             }
         ];
 
-        /* ========================================================
-           GAME ENGINE LOGIC 
-           ======================================================== */
-        let currentQueue = [];
-        let retryQueue = [];
-        let currentQuestionIndex = 0;
-        let selectedOptions = [];
-        let isMultipleChoice = false;
+        let shuffledQuestions = [];
+        let userAnswers = {}; 
+        let answeredCount = 0;
+        let missedCount = 0;
 
+        // Utility to shuffle an array
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -320,135 +341,176 @@
             return array;
         }
 
-        function initGame() {
-            // Create a deep copy and shuffle
-            currentQueue = shuffle(JSON.parse(JSON.stringify(masterQuestionsList)));
-            retryQueue = [];
-            currentQuestionIndex = 0;
-            document.getElementById("end-screen").style.display = "none";
-            document.getElementById("quiz-screen").style.display = "block";
-            document.getElementById("retry-status").style.display = "none";
-            loadQuestion();
+        // Initialize quiz on load
+        function initQuiz() {
+            shuffledQuestions = shuffle(JSON.parse(JSON.stringify(masterQuestionsList)));
+            const container = document.getElementById("questions-container");
+            container.innerHTML = "";
+            userAnswers = {};
+            answeredCount = 0;
+            missedCount = 0;
+
+            shuffledQuestions.forEach((q, qIndex) => {
+                userAnswers[qIndex] = [];
+                const isMulti = q.correctAnswers.length > 1;
+
+                const qBlock = document.createElement("div");
+                qBlock.className = "question-block";
+                qBlock.id = `qblock-${qIndex}`;
+
+                const qText = document.createElement("h2");
+                qText.className = "question-text";
+                qText.innerText = `${qIndex + 1}. ${q.question}`;
+                qBlock.appendChild(qText);
+
+                if (isMulti) {
+                    const inst = document.createElement("div");
+                    inst.className = "instruction";
+                    inst.innerText = "(Select all that apply, then click Check Answer)";
+                    qBlock.appendChild(inst);
+                }
+
+                const optionsGrid = document.createElement("div");
+                optionsGrid.className = "options-grid";
+
+                q.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement("button");
+                    btn.className = "option-btn";
+                    btn.id = `btn-${qIndex}-${optIndex}`;
+                    btn.innerText = optText;
+                    btn.onclick = () => toggleOption(qIndex, optIndex, isMulti);
+                    optionsGrid.appendChild(btn);
+                });
+
+                qBlock.appendChild(optionsGrid);
+
+                // If multiple choice, add a specific submit button for this question
+                if (isMulti) {
+                    const checkBtn = document.createElement("button");
+                    checkBtn.className = "action-btn check-btn";
+                    checkBtn.id = `check-btn-${qIndex}`;
+                    checkBtn.innerText = "Check Answer";
+                    checkBtn.onclick = () => evaluateQuestion(qIndex);
+                    qBlock.appendChild(checkBtn);
+                }
+
+                container.appendChild(qBlock);
+            });
         }
 
-        function startRetryRound() {
-            currentQueue = shuffle([...retryQueue]);
-            retryQueue = [];
-            currentQuestionIndex = 0;
-            document.getElementById("end-screen").style.display = "none";
-            document.getElementById("quiz-screen").style.display = "block";
-            document.getElementById("retry-status").style.display = "block";
-            loadQuestion();
+        // Handle option clicks
+        function toggleOption(qIndex, optIndex, isMulti) {
+            const qBlock = document.getElementById(`qblock-${qIndex}`);
+            if (qBlock.classList.contains("answered")) return; // Prevent clicking if already answered
+
+            let answers = userAnswers[qIndex];
+
+            if (isMulti) {
+                // Toggle selection for multiple choice
+                if (answers.includes(optIndex)) {
+                    answers.splice(answers.indexOf(optIndex), 1);
+                } else {
+                    answers.push(optIndex);
+                }
+                updateOptionUI(qIndex);
+            } else {
+                // Immediate submission for single choice
+                answers.length = 0; 
+                answers.push(optIndex);
+                updateOptionUI(qIndex);
+                evaluateQuestion(qIndex); 
+            }
         }
 
-        function loadQuestion() {
-            const q = currentQueue[currentQuestionIndex];
-            selectedOptions = [];
-            isMultipleChoice = q.correctAnswers.length > 1;
+        // Update selected visual states before submission
+        function updateOptionUI(qIndex) {
+            const q = shuffledQuestions[qIndex];
+            const answers = userAnswers[qIndex];
 
-            document.getElementById("progress-text").innerText = `Question ${currentQuestionIndex + 1} of ${currentQueue.length}`;
-            document.getElementById("question-text").innerText = q.question;
+            q.options.forEach((_, optIndex) => {
+                const btn = document.getElementById(`btn-${qIndex}-${optIndex}`);
+                if (answers.includes(optIndex)) {
+                    btn.classList.add("selected");
+                } else {
+                    btn.classList.remove("selected");
+                }
+            });
+        }
+
+        // Grade a specific question
+        function evaluateQuestion(qIndex) {
+            const qBlock = document.getElementById(`qblock-${qIndex}`);
+            if (qBlock.classList.contains("answered")) return; // Prevent double trigger
             
-            const optionsContainer = document.getElementById("options-container");
-            optionsContainer.innerHTML = "";
+            const selected = userAnswers[qIndex];
+            if (selected.length === 0) return; // Don't allow empty checks for multi-choice
 
-            q.options.forEach((optText, index) => {
-                const btn = document.createElement("button");
-                btn.className = "option-btn";
-                btn.innerText = optText;
-                btn.onclick = () => handleOptionClick(btn, index);
-                optionsContainer.appendChild(btn);
+            qBlock.classList.add("answered");
+            const q = shuffledQuestions[qIndex];
+            const correct = q.correctAnswers;
+
+            // Check if perfect match
+            const isCorrect = selected.length === correct.length && selected.every(val => correct.includes(val));
+
+            // Disable buttons and show correct/wrong
+            q.options.forEach((_, optIndex) => {
+                const btn = document.getElementById(`btn-${qIndex}-${optIndex}`);
+                btn.disabled = true; // Lock answer
+                
+                if (correct.includes(optIndex)) {
+                    btn.classList.add("correct");
+                }
+                if (selected.includes(optIndex) && !correct.includes(optIndex)) {
+                    btn.classList.add("wrong");
+                }
             });
 
-            const controls = document.getElementById("controls-container");
-            if (isMultipleChoice) {
-                controls.style.display = "block";
-            } else {
-                controls.style.display = "none";
-            }
-        }
-
-        function handleOptionClick(btn, index) {
-            if (isMultipleChoice) {
-                // Toggle selection
-                if (selectedOptions.includes(index)) {
-                    selectedOptions = selectedOptions.filter(i => i !== index);
-                    btn.classList.remove("selected");
-                } else {
-                    selectedOptions.push(index);
-                    btn.classList.add("selected");
-                }
-            } else {
-                // Single choice auto-submits
-                selectedOptions = [index];
-                checkAnswer();
-            }
-        }
-
-        function submitMultiAnswer() {
-            if (selectedOptions.length === 0) return;
-            checkAnswer();
-        }
-
-        function checkAnswer() {
-            const q = currentQueue[currentQuestionIndex];
-            const buttons = document.querySelectorAll(".option-btn");
-            
-            // Disable all buttons so user cannot undo
-            buttons.forEach(btn => btn.disabled = true);
-            document.getElementById("controls-container").style.display = "none";
-
-            // Check if selected options perfectly match correct answers
-            const isCorrect = 
-                selectedOptions.length === q.correctAnswers.length && 
-                selectedOptions.every(val => q.correctAnswers.includes(val));
-
             if (isCorrect) {
-                selectedOptions.forEach(idx => buttons[idx].classList.add("correct"));
-                setTimeout(nextQuestion, 1500); // Wait 1.5s before next
+                qBlock.classList.add("status-correct");
             } else {
-                // Show wrong selections in red
-                selectedOptions.forEach(idx => buttons[idx].classList.add("wrong"));
-                // Highlight the actual correct answers in green
-                q.correctAnswers.forEach(idx => buttons[idx].classList.add("correct"));
+                missedCount++;
+                qBlock.classList.add("status-wrong");
+            }
+
+            // Hide the Check button if it existed
+            const checkBtn = document.getElementById(`check-btn-${qIndex}`);
+            if (checkBtn) checkBtn.style.display = "none";
+
+            answeredCount++;
+            checkQuizCompletion();
+        }
+
+        // Check if all questions are done to reveal the ending screen
+        function checkQuizCompletion() {
+            if (answeredCount === shuffledQuestions.length) {
+                document.getElementById("results-area").style.display = "block";
                 
-                // Push to retry queue
-                retryQueue.push(q);
-                setTimeout(nextQuestion, 2500); // Wait 2.5s to let them review
+                const scoreDisplay = document.getElementById("score-display");
+                scoreDisplay.innerText = `Quiz Complete! You scored ${shuffledQuestions.length - missedCount} out of ${shuffledQuestions.length}.`;
+
+                if (missedCount > 0) {
+                    const wrongBtn = document.getElementById("show-wrong-btn");
+                    wrongBtn.style.display = "inline-block";
+                    wrongBtn.innerText = `Show Only Mistakes (${missedCount})`;
+                }
+                
+                // Scroll to the bottom to see score
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
         }
 
-        function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < currentQueue.length) {
-                loadQuestion();
-            } else {
-                endRound();
-            }
+        // Hide correctly answered questions to focus on mistakes
+        function showWrongAnswers() {
+            const correctBlocks = document.querySelectorAll(".status-correct");
+            correctBlocks.forEach(block => {
+                block.style.display = "none";
+            });
+
+            document.getElementById("show-wrong-btn").style.display = "none";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function endRound() {
-            document.getElementById("quiz-screen").style.display = "none";
-            const endScreen = document.getElementById("end-screen");
-            endScreen.style.display = "block";
-
-            const msg = document.getElementById("end-message");
-            const retryBtn = document.getElementById("next-round-btn");
-
-            if (retryQueue.length > 0) {
-                msg.innerText = `You missed ${retryQueue.length} question(s). Don't worry, let's practice them again!`;
-                retryBtn.style.display = "inline-block";
-                retryBtn.innerText = "Retry Missed Questions";
-            } else {
-                msg.innerText = "Incredible! You answered all questions correctly!";
-                retryBtn.style.display = "inline-block";
-                retryBtn.innerText = "Restart Full Quiz";
-                retryBtn.onclick = initGame;
-            }
-        }
-
-        // Start game on load
-        window.onload = initGame;
+        window.onload = initQuiz;
     </script>
 </body>
 </html>
