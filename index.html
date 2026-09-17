@@ -322,6 +322,36 @@
                 question: "A security analyst needs to filter /etc/passwd to locate account entries where the service shell /bin/false occurs specifically at the end of the line. Which regular expression anchors to return lines ending with false?",
                 options: ["grep 'false' /etc/passwd", "grep 'false$' /etc/passwd", "grep 'f...se' /etc/passwd", "grep ' false' /etc/passwd"],
                 correctAnswers: [1]
+            },
+            {
+                question: "A system administrator attempts to determine what is causing a computer to perform slower than normal. The administrator issues the ps command. What is displayed by this command?",
+                options: ["active processes using CPU time", "current RAM usage", "current SSD usage", "current HDD usage"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A developer writes a custom system greeting script called DataAnalyzer Pro in a Python source file. When this script is run, how does the system process the code?",
+                options: ["It translates and runs the source code line-by-line at runtime.", "It converts the code directly into natural human language.", "It compiles all source code into machine code prior to execution.", "It sends the raw text directly to the CPU without translation."],
+                correctAnswers: [0]
+            },
+            {
+                question: "True or False: A developer writes a function fibonacci(n) that uses the yield statement to return sequence numbers sequentially. Using yield creates a generator that relies on lazy evaluation to produce values on-the-fly, preventing system memory from holding large lists.",
+                options: ["True", "False"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A user issues a Linux command and the result is shown (a detailed directory list displaying permissions like drwxr-xr-x). Which Linux command is used to display the contents of the current directory as shown?",
+                options: ["ln", "ls -a", "ls -l", "ls -lr"],
+                correctAnswers: [2]
+            },
+            {
+                question: "An application prompts a user for their birth year. If the user enters string text like \"Two Thousand\", executing int(user_input) raises an error. Which specific except block should be used to catch this invalid string-to-integer conversion?",
+                options: ["except ValueError:", "except TypeError:", "except ZeroDivisionError:", "except FileNotFoundError:"],
+                correctAnswers: [0]
+            },
+            {
+                question: "True or False: A developer needs to trigger a specialized runtime error whenever a number is negative by creating a custom NegativeNumberError class. Custom exceptions are created by inheriting from the base Exception class.",
+                options: ["True", "False"],
+                correctAnswers: [0]
             }
         ];
 
@@ -330,7 +360,6 @@
         let answeredCount = 0;
         let missedCount = 0;
 
-        // Utility to shuffle an array
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -341,7 +370,6 @@
             return array;
         }
 
-        // Initialize quiz on load
         function initQuiz() {
             shuffledQuestions = shuffle(JSON.parse(JSON.stringify(masterQuestionsList)));
             const container = document.getElementById("questions-container");
@@ -384,7 +412,6 @@
 
                 qBlock.appendChild(optionsGrid);
 
-                // If multiple choice, add a specific submit button for this question
                 if (isMulti) {
                     const checkBtn = document.createElement("button");
                     checkBtn.className = "action-btn check-btn";
@@ -398,15 +425,13 @@
             });
         }
 
-        // Handle option clicks
         function toggleOption(qIndex, optIndex, isMulti) {
             const qBlock = document.getElementById(`qblock-${qIndex}`);
-            if (qBlock.classList.contains("answered")) return; // Prevent clicking if already answered
+            if (qBlock.classList.contains("answered")) return; 
 
             let answers = userAnswers[qIndex];
 
             if (isMulti) {
-                // Toggle selection for multiple choice
                 if (answers.includes(optIndex)) {
                     answers.splice(answers.indexOf(optIndex), 1);
                 } else {
@@ -414,7 +439,6 @@
                 }
                 updateOptionUI(qIndex);
             } else {
-                // Immediate submission for single choice
                 answers.length = 0; 
                 answers.push(optIndex);
                 updateOptionUI(qIndex);
@@ -422,7 +446,6 @@
             }
         }
 
-        // Update selected visual states before submission
         function updateOptionUI(qIndex) {
             const q = shuffledQuestions[qIndex];
             const answers = userAnswers[qIndex];
@@ -437,25 +460,22 @@
             });
         }
 
-        // Grade a specific question
         function evaluateQuestion(qIndex) {
             const qBlock = document.getElementById(`qblock-${qIndex}`);
-            if (qBlock.classList.contains("answered")) return; // Prevent double trigger
+            if (qBlock.classList.contains("answered")) return; 
             
             const selected = userAnswers[qIndex];
-            if (selected.length === 0) return; // Don't allow empty checks for multi-choice
+            if (selected.length === 0) return; 
 
             qBlock.classList.add("answered");
             const q = shuffledQuestions[qIndex];
             const correct = q.correctAnswers;
 
-            // Check if perfect match
             const isCorrect = selected.length === correct.length && selected.every(val => correct.includes(val));
 
-            // Disable buttons and show correct/wrong
             q.options.forEach((_, optIndex) => {
                 const btn = document.getElementById(`btn-${qIndex}-${optIndex}`);
-                btn.disabled = true; // Lock answer
+                btn.disabled = true; 
                 
                 if (correct.includes(optIndex)) {
                     btn.classList.add("correct");
@@ -472,7 +492,6 @@
                 qBlock.classList.add("status-wrong");
             }
 
-            // Hide the Check button if it existed
             const checkBtn = document.getElementById(`check-btn-${qIndex}`);
             if (checkBtn) checkBtn.style.display = "none";
 
@@ -480,7 +499,6 @@
             checkQuizCompletion();
         }
 
-        // Check if all questions are done to reveal the ending screen
         function checkQuizCompletion() {
             if (answeredCount === shuffledQuestions.length) {
                 document.getElementById("results-area").style.display = "block";
@@ -494,12 +512,10 @@
                     wrongBtn.innerText = `Show Only Mistakes (${missedCount})`;
                 }
                 
-                // Scroll to the bottom to see score
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
         }
 
-        // Hide correctly answered questions to focus on mistakes
         function showWrongAnswers() {
             const correctBlocks = document.querySelectorAll(".status-correct");
             correctBlocks.forEach(block => {
