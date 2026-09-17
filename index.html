@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        :root {
+            --primary: #8a2be2;
+            --primary-hover: #7b24c7;
+            --bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text: #ffffff;
+            --correct: #28a745;
+            --wrong: #dc3545;
+            --option-bg: #0f3460;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h2#question-text {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background-color: var(--option-bg);
+            color: var(--text);
+            border: 2px solid transparent;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+            border-color: var(--primary);
+        }
+
+        .option-btn.selected {
+            border-color: #f39c12;
+            background-color: #2c3e50;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct);
+            border-color: var(--correct);
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong);
+            border-color: var(--wrong);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .controls {
+            margin-top: 25px;
+            display: none; /* Hidden by default, shown for multi-select or next question */
+        }
+
+        .action-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #aaa;
+        }
+
+        #end-screen {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container" id="quiz-screen">
+        <div class="status-bar">
+            <span id="progress-text">Question 1 / 10</span>
+            <span id="retry-status" style="color: #f39c12; display: none;">Retry Mode</span>
+        </div>
+        <h2 id="question-text">Question goes here...</h2>
+        <div class="options-grid" id="options-container">
+            <!-- Options generated here -->
+        </div>
+        <div class="controls" id="controls-container">
+            <button class="action-btn" id="submit-btn" onclick="submitMultiAnswer()">Submit Answer</button>
+        </div>
+    </div>
+
+    <div class="quiz-container" id="end-screen">
+        <h2>Round Complete!</h2>
+        <p id="end-message" style="font-size: 1.2rem; margin-bottom: 20px;"></p>
+        <button class="action-btn" id="next-round-btn" onclick="startRetryRound()">Retry Wrong Questions</button>
+    </div>
+
+    <script>
+        /* 
+        ========================================================
+        EASY CONFIGURATION AREA
+        To change the correct answer, update the "correctAnswers" array.
+        Note: Options are numbered starting from 0. 
+        So if the 2nd option is correct, write correctAnswers: [1].
+        If multiple answers are correct, write correctAnswers: [0, 3] etc.
+        ========================================================
+        */
+        const masterQuestionsList = [
+            {
+                question: "A data pipeline defines a global variable tax_rate = 0.08 alongside a modular invoice calculation function...\nWhich statements correctly explain variable scope behavior and data structure properties in this architecture? (Select ALL that apply)",
+                options: [
+                    "Calling calculate_invoice(100) evaluates using the local tax_rate of 0.10.",
+                    "Executing calculate_invoice(100) permanently overwrites the global tax_rate value to 0.10.",
+                    "Immutable data structures such as Tuples cannot be modified after creation.",
+                    "The local tax_rate variable inside calculate_invoice shadows the global tax_rate variable within the function's scope."
+                ],
+                correctAnswers: [0, 3] 
+            },
+            {
+                question: "A system administrator suspects a background process is overloading CPU resources and wants to display all running processes across the operating system with full detail, including User ID (UID), Process ID (PID), and Parent Process ID (PPID). Which command provides this detailed process listing?",
+                options: ["ps", "ps -ef", "ps -r", "pwd -ef"],
+                correctAnswers: [1]
+            },
+            {
+                question: "An administrator installs speedtest-cli on the virtual machine and later decides to delete the application completely. Running sudo apt-get purge speedtest-cli completely removes the package from the system.",
+                options: ["True", "False"],
+                correctAnswers: [0]
+            },
+            {
+                question: "What command is used to rename a file in a Linux system?",
+                options: ["mv", "rm", "cp", "dd"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A calculator function divides two figures using a / b. If b=0, placing the operation inside a try block accompanied by an except ZeroDivisionError: block prevents the application from crashing and allows returning a user-friendly error string.",
+                options: ["True", "False"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A programmer is writing a Python script that must execute one block of code only if a specific condition is met, and otherwise execute a different block. Which following commands is used in Python to create this fundamental conditional control structure?",
+                options: ["def", "if", "while", "from"],
+                correctAnswers: [1]
+            },
+            {
+                question: "A student new to Python is working in the interactive interpreter mode. The student issues the ipAddress = {'R1':'10.1.1.1', 'R2':'10.2.2.1', 'R3':'10.3.3.1'}\nWhich Python expression can be used to retrieve the IP address of R2?",
+                options: ["ipAddress['R2']", "ipAddress('R2')", "ipAddress[R2]", "ipAddress{'R2'}"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A Linux system administrator is auditing user accounts and needs to find any entries in the /etc/passwd file where the username begins with a digit (0-9). Which of the following grep commands should the administrator use to effectively find these specific entries?",
+                options: ["grep '^[0-9]' /etc/passwd", "grep '[0-9]' /etc/passwd", "grep '\\$[0-9]' /etc/passwd", "grep '*[0-9]' /etc/passwd"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A warehouse manifest list is defined as delivery_manifest = [\"part_101\", \"part_240\", \"part_330\", \"part_999\"]. What item is returned when evaluating delivery_manifest[-1]?",
+                options: ["IndexError", "\"part_101\"", "\"part_240\"", "\"part_999\""],
+                correctAnswers: [3]
+            },
+            {
+                question: "A network engineer needs to perform a comprehensive check of a Linux server's network configuration and decides to use the ifconfig -a command. What information is specifically displayed as a result of executing this command?",
+                options: ["The ARP table of the computer will be displayed.", "All active interfaces will display information.", "The host routing table will be displayed.", "Both active and inactive interfaces will display information."],
+                correctAnswers: [3]
+            },
+            {
+                question: "An inventory system manages a fruit collection: fruits = [\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"]. A worker executes print(fruits[1:4]). Which list is displayed?",
+                options: ["[\"banana\", \"cherry\", \"date\"]", "[\"apple\", \"elderberry\"]", "[\"apple\", \"banana\", \"cherry\"]", "[\"banana\", \"cherry\", \"date\"] (Note: Slicing from index 1 to 4 returns elements at index 1, 2, and 3)"],
+                correctAnswers: [3]
+            },
+            {
+                question: "A student is practicing basic Python operations and enters the following two lines into the interactive interpreter:\naddition = 22 + 10\nprint(addition)\nWhat is the numerical output displayed to the student's screen after the second line is executed?",
+                options: ["[22] + [10]", "32", "nothing", "(syntaxerror)-..."],
+                correctAnswers: [1]
+            },
+            {
+                question: "A student is exploring Python's behavior with different data types and enters a simple multiplication sequence:\ny=2\ny*3\n6\n'Test'*y\nWhat is the output or resulting string value of the expression 'Test'*y?",
+                options: ["TypeError", "'TestTest'", "'Test2'", "'Test6'"],
+                correctAnswers: [1]
+            },
+            {
+                question: "Which Python programming function is used to display output?",
+                options: ["if", "for", "while", "print"],
+                correctAnswers: [3]
+            },
+            {
+                question: "A software engineer is developing a project and wants to organize multiple related Python scripts inside a directory structure named analytics. What Python construct is created by organizing scripts into a directory marked by an __init__.py file?",
+                options: ["An exception handler", "A package", "A standalone module", "A standard library module"],
+                correctAnswers: [1]
+            },
+            {
+                question: "A student needs to change the filename myfile.sh to myfile_renamed.sh inside their current working directory. In Linux, the mv command is used both for moving files between directories and for renaming files within a directory.",
+                options: ["True", "False"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A user is currently working deep within a directory structure and checks their current location, then executes a change directory command in Bash:\n(user)$ pwd\n/home/devasc/labs/ansible/backups\n(user)$ cd ../..\nWhich directory is the current directory after the cd ../.. command is executed?",
+                options: ["/home/devasc/", "/home/devasc/labs", "/", "/home"],
+                correctAnswers: [1]
+            },
+            {
+                question: "An HR system queries an employee dictionary employees = {\"1001\": \"Engineering\", \"1002\": \"Marketing\"} using employees[\"9999\"]. If this code runs without a try except block, the program will crash with a KeyError.",
+                options: ["True", "False"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A system administrator in the DEVASC VM creates a file using echo \"Linux is AWESOME!\" > linux.txt. They then want to duplicate this file and add additional text without deleting the original contents. Which of the following commands or statements accurately describe file redirection? (Choose ALL that apply)",
+                options: [
+                    "Executing echo \"I LOVE Linux!\" > linux2.txt appends the text without overwriting prior file content.",
+                    "Executing cat linux.txt > linux2.txt creates linux2.txt containing \"Linux is AWESOME!\".",
+                    "Executing echo \"Linux is POWERFUL!\" > linux.txt replaces the existing content in linux.txt with \"Linux is POWERFUL!\".",
+                    "Executing echo \"I LOVE Linux!\" >> linux2.txt appends the text to linux2.txt, preserving \"Linux is AWESOME!\"."
+                ],
+                correctAnswers: [1, 2, 3]
+            },
+            {
+                question: "A student new to Python is working in the interactive interpreter and defines a variable to store network device IP addresses mapped to their names.\nWhich fundamental Python data type is used to represent the variable ipAddress?",
+                options: ["array", "dictionary", "list", "tuple"],
+                correctAnswers: [1]
+            },
+            {
+                question: "A GPS application stores coordinate pairs using a tuple: coordinates = (10.5, 20.0). During a route update, the application updates the tuple without raising an error.",
+                options: ["True", "False"],
+                correctAnswers: [1]
+            },
+            {
+                question: "A fitness application tracks total workout duration in minutes (total_minutes = 130) and converts it to full hours using integer division. What is the value stored in hours?",
+                options: ["2.17", "10", "2", "2.1666666666666665"],
+                correctAnswers: [2]
+            },
+            {
+                question: "A system administrator is preparing a Linux server for maintenance and decides to execute the apt-get upgrade command. What does the apt-get upgrade command perform in this scenario?",
+                options: [
+                    "Every application installed on the system will update itself to the latest version.",
+                    "Operating system updates are downloaded and will be installed.",
+                    "Operating system updates are downloaded and will be installed.", 
+                    "The remote repository of applications and dependencies will be updated to the latest version."
+                ],
+                correctAnswers: [0]
+            },
+            {
+                question: "A Linux system administrator is searching the passwd file for any username that starts with a digit. Which command accomplishes this?",
+                options: ["grep '_[0-9]' /etc/passwd", "grep '(0-9)' /etc/passwd", "grep '[0-9]' /etc/passwd", "grep '^[0-9]' /etc/passwd"],
+                correctAnswers: [3]
+            },
+            {
+                question: "A user enters string text instead of a number into an input field, raising a ValueError inside a try block. An except Exception block will catch this ValueError because exceptions follow a hierarchy where Exception catches almost all runtime errors.",
+                options: ["True", "False"],
+                correctAnswers: [0]
+            },
+            {
+                question: "A security analyst needs to filter /etc/passwd to locate account entries where the service shell /bin/false occurs specifically at the end of the line. Which regular expression anchors to return lines ending with false?",
+                options: ["grep 'false' /etc/passwd", "grep 'false$' /etc/passwd", "grep 'f...se' /etc/passwd", "grep ' false' /etc/passwd"],
+                correctAnswers: [1]
+            }
+        ];
+
+        /* ========================================================
+           GAME ENGINE LOGIC 
+           ======================================================== */
+        let currentQueue = [];
+        let retryQueue = [];
+        let currentQuestionIndex = 0;
+        let selectedOptions = [];
+        let isMultipleChoice = false;
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initGame() {
+            // Create a deep copy and shuffle
+            currentQueue = shuffle(JSON.parse(JSON.stringify(masterQuestionsList)));
+            retryQueue = [];
+            currentQuestionIndex = 0;
+            document.getElementById("end-screen").style.display = "none";
+            document.getElementById("quiz-screen").style.display = "block";
+            document.getElementById("retry-status").style.display = "none";
+            loadQuestion();
+        }
+
+        function startRetryRound() {
+            currentQueue = shuffle([...retryQueue]);
+            retryQueue = [];
+            currentQuestionIndex = 0;
+            document.getElementById("end-screen").style.display = "none";
+            document.getElementById("quiz-screen").style.display = "block";
+            document.getElementById("retry-status").style.display = "block";
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = currentQueue[currentQuestionIndex];
+            selectedOptions = [];
+            isMultipleChoice = q.correctAnswers.length > 1;
+
+            document.getElementById("progress-text").innerText = `Question ${currentQuestionIndex + 1} of ${currentQueue.length}`;
+            document.getElementById("question-text").innerText = q.question;
+            
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            q.options.forEach((optText, index) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = optText;
+                btn.onclick = () => handleOptionClick(btn, index);
+                optionsContainer.appendChild(btn);
+            });
+
+            const controls = document.getElementById("controls-container");
+            if (isMultipleChoice) {
+                controls.style.display = "block";
+            } else {
+                controls.style.display = "none";
+            }
+        }
+
+        function handleOptionClick(btn, index) {
+            if (isMultipleChoice) {
+                // Toggle selection
+                if (selectedOptions.includes(index)) {
+                    selectedOptions = selectedOptions.filter(i => i !== index);
+                    btn.classList.remove("selected");
+                } else {
+                    selectedOptions.push(index);
+                    btn.classList.add("selected");
+                }
+            } else {
+                // Single choice auto-submits
+                selectedOptions = [index];
+                checkAnswer();
+            }
+        }
+
+        function submitMultiAnswer() {
+            if (selectedOptions.length === 0) return;
+            checkAnswer();
+        }
+
+        function checkAnswer() {
+            const q = currentQueue[currentQuestionIndex];
+            const buttons = document.querySelectorAll(".option-btn");
+            
+            // Disable all buttons so user cannot undo
+            buttons.forEach(btn => btn.disabled = true);
+            document.getElementById("controls-container").style.display = "none";
+
+            // Check if selected options perfectly match correct answers
+            const isCorrect = 
+                selectedOptions.length === q.correctAnswers.length && 
+                selectedOptions.every(val => q.correctAnswers.includes(val));
+
+            if (isCorrect) {
+                selectedOptions.forEach(idx => buttons[idx].classList.add("correct"));
+                setTimeout(nextQuestion, 1500); // Wait 1.5s before next
+            } else {
+                // Show wrong selections in red
+                selectedOptions.forEach(idx => buttons[idx].classList.add("wrong"));
+                // Highlight the actual correct answers in green
+                q.correctAnswers.forEach(idx => buttons[idx].classList.add("correct"));
+                
+                // Push to retry queue
+                retryQueue.push(q);
+                setTimeout(nextQuestion, 2500); // Wait 2.5s to let them review
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQueue.length) {
+                loadQuestion();
+            } else {
+                endRound();
+            }
+        }
+
+        function endRound() {
+            document.getElementById("quiz-screen").style.display = "none";
+            const endScreen = document.getElementById("end-screen");
+            endScreen.style.display = "block";
+
+            const msg = document.getElementById("end-message");
+            const retryBtn = document.getElementById("next-round-btn");
+
+            if (retryQueue.length > 0) {
+                msg.innerText = `You missed ${retryQueue.length} question(s). Don't worry, let's practice them again!`;
+                retryBtn.style.display = "inline-block";
+                retryBtn.innerText = "Retry Missed Questions";
+            } else {
+                msg.innerText = "Incredible! You answered all questions correctly!";
+                retryBtn.style.display = "inline-block";
+                retryBtn.innerText = "Restart Full Quiz";
+                retryBtn.onclick = initGame;
+            }
+        }
+
+        // Start game on load
+        window.onload = initGame;
+    </script>
+</body>
+</html>
