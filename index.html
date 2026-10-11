@@ -3,364 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Quiz</title>
+    <title>Exam Bank Reviewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #8a2be2;
-            --primary-hover: #7b24c7;
-            --bg: #1a1a2e;
-            --card-bg: #16213e;
-            --text: #ffffff;
-            --correct: #28a745;
-            --wrong: #dc3545;
-            --option-bg: #0f3460;
-            --block-bg: rgba(0, 0, 0, 0.2);
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .quiz-container {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            max-width: 800px;
-            width: 100%;
-        }
-
-        .quiz-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--primary);
-        }
-
-        .question-block {
-            background-color: var(--block-bg);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-        }
-
-        .question-text {
-            font-size: 1.3rem;
-            margin-top: 0;
-            margin-bottom: 20px;
-            line-height: 1.4;
-            white-space: pre-wrap;
-        }
-
-        .instruction {
-            font-size: 0.9rem;
-            color: #f39c12;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        .option-btn {
-            background-color: var(--option-bg);
-            color: var(--text);
-            border: 2px solid transparent;
-            padding: 15px 20px;
-            font-size: 1.05rem;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-            width: 100%;
-        }
-
-        .option-btn:hover:not(:disabled) {
-            transform: scale(1.01);
-            border-color: var(--primary);
-        }
-
-        .option-btn.selected {
-            border-color: #f39c12;
-            background-color: #2c3e50;
-        }
-
-        .option-btn.correct {
-            background-color: var(--correct) !important;
-            border-color: var(--correct) !important;
-            color: white;
-        }
-
-        .option-btn.wrong {
-            background-color: var(--wrong) !important;
-            border-color: var(--wrong) !important;
-            color: white;
-            opacity: 0.8;
-        }
-
-        .option-btn:disabled {
-            cursor: default;
-        }
-
-        .action-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 10px;
-        }
-
-        .action-btn:hover {
-            background-color: var(--primary-hover);
-        }
-        
-        .check-btn {
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            background-color: #f39c12;
-            margin-left: 0;
-        }
-
-        .check-btn:hover {
-            background-color: #d68910;
-        }
-
-        #results-area {
-            display: none;
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid var(--primary);
-        }
-
-        #score-display {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #f39c12;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind slate-50 */
         }
     </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased pb-24">
 
-    <div class="quiz-container">
-        <div class="quiz-header">
-            <h1>Comprehensive Quiz</h1>
-            <p>Select an answer to see immediate feedback. Complete all questions to see your final score at the bottom!</p>
-        </div>
+    <!-- Fixed Header -->
+    <header class="fixed top-0 w-full bg-slate-900 text-white px-4 py-3 shadow-lg z-50 flex justify-between items-center h-16">
+        <h1 class="text-lg md:text-xl font-bold truncate pr-4">Exam Bank Reviewer</h1>
+        <button id="reset-btn" class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm transition shadow shadow-blue-500/30 whitespace-nowrap">
+            Reset Reviewer
+        </button>
+    </header>
 
-        <div id="questions-container">
-            <!-- All questions will be injected here -->
-        </div>
-
-        <div id="results-area">
-            <div id="score-display"></div>
-            <button class="action-btn" id="show-wrong-btn" onclick="showWrongAnswers()" style="display: none; background-color: #dc3545;">Show Only Mistakes</button>
-            <button class="action-btn" id="retry-btn" onclick="location.reload()">Restart Quiz</button>
-        </div>
-    </div>
+    <!-- Main Content -->
+    <main id="quiz-container" class="mt-20 max-w-4xl mx-auto px-4 flex flex-col gap-6">
+        <!-- Question cards will be injected here via JavaScript -->
+    </main>
 
     <script>
-        const masterQuestionsList = [
-            {
-                question: "A data pipeline defines a global variable tax_rate = 0.08 alongside a modular invoice calculation function...\nWhich statements correctly explain variable scope behavior and data structure properties in this architecture? (Select ALL that apply)",
-                options: [
-                    "Calling calculate_invoice(100) evaluates using the local tax_rate of 0.10.",
-                    "Executing calculate_invoice(100) permanently overwrites the global tax_rate value to 0.10.",
-                    "Immutable data structures such as Tuples cannot be modified after creation.",
-                    "The local tax_rate variable inside calculate_invoice shadows the global tax_rate variable within the function's scope."
-                ],
-                correctAnswers: [0, 3] 
-            },
-            {
-                question: "A system administrator suspects a background process is overloading CPU resources and wants to display all running processes across the operating system with full detail, including User ID (UID), Process ID (PID), and Parent Process ID (PPID). Which command provides this detailed process listing?",
-                options: ["ps", "ps -ef", "ps -r", "pwd -ef"],
-                correctAnswers: [1]
-            },
-            {
-                question: "An administrator installs speedtest-cli on the virtual machine and later decides to delete the application completely. Running sudo apt-get purge speedtest-cli completely removes the package from the system.",
-                options: ["True", "False"],
-                correctAnswers: [0]
-            },
-            {
-                question: "What command is used to rename a file in a Linux system?",
-                options: ["mv", "rm", "cp", "dd"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A calculator function divides two figures using a / b. If b=0, placing the operation inside a try block accompanied by an except ZeroDivisionError: block prevents the application from crashing and allows returning a user-friendly error string.",
-                options: ["True", "False"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A programmer is writing a Python script that must execute one block of code only if a specific condition is met, and otherwise execute a different block. Which following commands is used in Python to create this fundamental conditional control structure?",
-                options: ["def", "if", "while", "from"],
-                correctAnswers: [1]
-            },
-            {
-                question: "A student new to Python is working in the interactive interpreter mode. The student issues the ipAddress = {'R1':'10.1.1.1', 'R2':'10.2.2.1', 'R3':'10.3.3.1'}\nWhich Python expression can be used to retrieve the IP address of R2?",
-                options: ["ipAddress['R2']", "ipAddress('R2')", "ipAddress[R2]", "ipAddress{'R2'}"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A Linux system administrator is auditing user accounts and needs to find any entries in the /etc/passwd file where the username begins with a digit (0-9). Which of the following grep commands should the administrator use to effectively find these specific entries?",
-                options: ["grep '^[0-9]' /etc/passwd", "grep '[0-9]' /etc/passwd", "grep '\\$[0-9]' /etc/passwd", "grep '*[0-9]' /etc/passwd"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A warehouse manifest list is defined as delivery_manifest = [\"part_101\", \"part_240\", \"part_330\", \"part_999\"]. What item is returned when evaluating delivery_manifest[-1]?",
-                options: ["IndexError", "\"part_101\"", "\"part_240\"", "\"part_999\""],
-                correctAnswers: [3]
-            },
-            {
-                question: "A network engineer needs to perform a comprehensive check of a Linux server's network configuration and decides to use the ifconfig -a command. What information is specifically displayed as a result of executing this command?",
-                options: ["The ARP table of the computer will be displayed.", "All active interfaces will display information.", "The host routing table will be displayed.", "Both active and inactive interfaces will display information."],
-                correctAnswers: [3]
-            },
-            {
-                question: "An inventory system manages a fruit collection: fruits = [\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"]. A worker executes print(fruits[1:4]). Which list is displayed?",
-                options: ["[\"banana\", \"cherry\", \"date\"]", "[\"apple\", \"elderberry\"]", "[\"apple\", \"banana\", \"cherry\"]", "[\"banana\", \"cherry\", \"date\"] (Note: Slicing from index 1 to 4 returns elements at index 1, 2, and 3)"],
-                correctAnswers: [3]
-            },
-            {
-                question: "A student is practicing basic Python operations and enters the following two lines into the interactive interpreter:\naddition = 22 + 10\nprint(addition)\nWhat is the numerical output displayed to the student's screen after the second line is executed?",
-                options: ["[22] + [10]", "32", "nothing", "(syntaxerror)-..."],
-                correctAnswers: [1]
-            },
-            {
-                question: "A student is exploring Python's behavior with different data types and enters a simple multiplication sequence:\ny=2\ny*3\n6\n'Test'*y\nWhat is the output or resulting string value of the expression 'Test'*y?",
-                options: ["TypeError", "'TestTest'", "'Test2'", "'Test6'"],
-                correctAnswers: [1]
-            },
-            {
-                question: "Which Python programming function is used to display output?",
-                options: ["if", "for", "while", "print"],
-                correctAnswers: [3]
-            },
-            {
-                question: "A software engineer is developing a project and wants to organize multiple related Python scripts inside a directory structure named analytics. What Python construct is created by organizing scripts into a directory marked by an __init__.py file?",
-                options: ["An exception handler", "A package", "A standalone module", "A standard library module"],
-                correctAnswers: [1]
-            },
-            {
-                question: "A student needs to change the filename myfile.sh to myfile_renamed.sh inside their current working directory. In Linux, the mv command is used both for moving files between directories and for renaming files within a directory.",
-                options: ["True", "False"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A user is currently working deep within a directory structure and checks their current location, then executes a change directory command in Bash:\n(user)$ pwd\n/home/devasc/labs/ansible/backups\n(user)$ cd ../..\nWhich directory is the current directory after the cd ../.. command is executed?",
-                options: ["/home/devasc/", "/home/devasc/labs", "/", "/home"],
-                correctAnswers: [1]
-            },
-            {
-                question: "An HR system queries an employee dictionary employees = {\"1001\": \"Engineering\", \"1002\": \"Marketing\"} using employees[\"9999\"]. If this code runs without a try except block, the program will crash with a KeyError.",
-                options: ["True", "False"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A system administrator in the DEVASC VM creates a file using echo \"Linux is AWESOME!\" > linux.txt. They then want to duplicate this file and add additional text without deleting the original contents. Which of the following commands or statements accurately describe file redirection? (Choose ALL that apply)",
-                options: [
-                    "Executing echo \"I LOVE Linux!\" > linux2.txt appends the text without overwriting prior file content.",
-                    "Executing cat linux.txt > linux2.txt creates linux2.txt containing \"Linux is AWESOME!\".",
-                    "Executing echo \"Linux is POWERFUL!\" > linux.txt replaces the existing content in linux.txt with \"Linux is POWERFUL!\".",
-                    "Executing echo \"I LOVE Linux!\" >> linux2.txt appends the text to linux2.txt, preserving \"Linux is AWESOME!\"."
-                ],
-                correctAnswers: [1, 2, 3]
-            },
-            {
-                question: "A student new to Python is working in the interactive interpreter and defines a variable to store network device IP addresses mapped to their names.\nWhich fundamental Python data type is used to represent the variable ipAddress?",
-                options: ["array", "dictionary", "list", "tuple"],
-                correctAnswers: [1]
-            },
-            {
-                question: "A GPS application stores coordinate pairs using a tuple: coordinates = (10.5, 20.0). During a route update, the application updates the tuple without raising an error.",
-                options: ["True", "False"],
-                correctAnswers: [1]
-            },
-            {
-                question: "A fitness application tracks total workout duration in minutes (total_minutes = 130) and converts it to full hours using integer division. What is the value stored in hours?",
-                options: ["2.17", "10", "2", "2.1666666666666665"],
-                correctAnswers: [2]
-            },
-            {
-                question: "A system administrator is preparing a Linux server for maintenance and decides to execute the apt-get upgrade command. What does the apt-get upgrade command perform in this scenario?",
-                options: [
-                    "Every application installed on the system will update itself to the latest version.",
-                    "Operating system updates are downloaded and will be installed.",
-                    "Operating system updates are downloaded and will be installed.", 
-                    "The remote repository of applications and dependencies will be updated to the latest version."
-                ],
-                correctAnswers: [0]
-            },
-            {
-                question: "A Linux system administrator is searching the passwd file for any username that starts with a digit. Which command accomplishes this?",
-                options: ["grep '_[0-9]' /etc/passwd", "grep '(0-9)' /etc/passwd", "grep '[0-9]' /etc/passwd", "grep '^[0-9]' /etc/passwd"],
-                correctAnswers: [3]
-            },
-            {
-                question: "A user enters string text instead of a number into an input field, raising a ValueError inside a try block. An except Exception block will catch this ValueError because exceptions follow a hierarchy where Exception catches almost all runtime errors.",
-                options: ["True", "False"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A security analyst needs to filter /etc/passwd to locate account entries where the service shell /bin/false occurs specifically at the end of the line. Which regular expression anchors to return lines ending with false?",
-                options: ["grep 'false' /etc/passwd", "grep 'false$' /etc/passwd", "grep 'f...se' /etc/passwd", "grep ' false' /etc/passwd"],
-                correctAnswers: [1]
-            },
-            {
-                question: "A system administrator attempts to determine what is causing a computer to perform slower than normal. The administrator issues the ps command. What is displayed by this command?",
-                options: ["active processes using CPU time", "current RAM usage", "current SSD usage", "current HDD usage"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A developer writes a custom system greeting script called DataAnalyzer Pro in a Python source file. When this script is run, how does the system process the code?",
-                options: ["It translates and runs the source code line-by-line at runtime.", "It converts the code directly into natural human language.", "It compiles all source code into machine code prior to execution.", "It sends the raw text directly to the CPU without translation."],
-                correctAnswers: [0]
-            },
-            {
-                question: "True or False: A developer writes a function fibonacci(n) that uses the yield statement to return sequence numbers sequentially. Using yield creates a generator that relies on lazy evaluation to produce values on-the-fly, preventing system memory from holding large lists.",
-                options: ["True", "False"],
-                correctAnswers: [0]
-            },
-            {
-                question: "A user issues a Linux command and the result is shown (a detailed directory list displaying permissions like drwxr-xr-x). Which Linux command is used to display the contents of the current directory as shown?",
-                options: ["ln", "ls -a", "ls -l", "ls -lr"],
-                correctAnswers: [2]
-            },
-            {
-                question: "An application prompts a user for their birth year. If the user enters string text like \"Two Thousand\", executing int(user_input) raises an error. Which specific except block should be used to catch this invalid string-to-integer conversion?",
-                options: ["except ValueError:", "except TypeError:", "except ZeroDivisionError:", "except FileNotFoundError:"],
-                correctAnswers: [0]
-            },
-            {
-                question: "True or False: A developer needs to trigger a specialized runtime error whenever a number is negative by creating a custom NegativeNumberError class. Custom exceptions are created by inheriting from the base Exception class.",
-                options: ["True", "False"],
-                correctAnswers: [0]
-            }
+        // The complete set of questions provided
+        const originalQuizData = [
+            { "q": "1. Which command checks the version of the running Python package?", "options": ["A. python3 -i", "B. python3 -q", "C. python3 --v", "D. python3 -V"], "answer": "D", "why": "capital V prints the version. -i forces interactive mode, -q hides the banner, --v is not valid." },
+            { "q": "2. addition = 22 + 10, then print(addition). What is displayed?", "options": ["A. (syntaxerror)-...", "B. 32", "C. nothing", "D. [22] + [10]"], "answer": "B", "why": "+ on two integers adds them, and print() shows the result." },
+            { "q": "3. type(True) what data type is reported?", "options": ["A. string", "B. Boolean", "C. integer", "D. float"], "answer": "B", "why": "True and False are Booleans (<class 'bool'>)." },
+            { "q": "4. type(PAGENAME) where the variable holds text. What is printed?", "options": ["A. <class 'str'>", "B. <class 'type'>", "C. <class 'int'>", "D. <class 'dict'>", "E. <class 'tuple'>"], "answer": "A", "why": "anything in quotes is a string." },
+            { "q": "5. Which Python function is used to display output?", "options": ["A. print", "B. for", "C. while", "D. if"], "answer": "A", "why": "for and while loop, if branches; only print outputs." },
+            { "q": "6. total_minutes = 130; hours = total_minutes // 60. What is stored in hours?", "options": ["A. 2", "B. 10", "C. 2.17", "D. 2.1666666666666665"], "answer": "A", "why": "// is floor division: it drops the remainder and returns a whole number." },
+            { "q": "7. minutes = total_minutes % 60 with total_minutes = 130. What is minutes?", "options": ["A. 10", "B. 2", "C. 60", "D. 0"], "answer": "A", "why": "% returns the remainder: 130 = (2 * 60) + 10." },
+            { "q": "8. 10 // 3 - what value results?", "options": ["A. 3", "B. 3.33", "C. 1", "D. 3.0"], "answer": "A", "why": "floor division of two ints gives an int, not a float." },
+            { "q": "9. A Python source file is run. How does the system process the code?", "options": ["A. Translates and runs it line-by-line at runtime", "B. Converts it into natural human language", "C. Compiles all source into machine code first", "D. Sends raw text to the CPU"], "answer": "A", "why": "Python is interpreted; there is no separate compile step like C." },
+            { "q": "10. fruits = [\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"]; print(fruits[1:4])", "options": ["A. [\"apple\", \"banana\", \"cherry\"]", "B. [\"apple\", \"elderberry\"]", "C. [\"banana\", \"cherry\", \"date\", \"elderberry\"]", "D. [\"banana\", \"cherry\", \"date\"]"], "answer": "D", "why": "a slice starts at the first index and stops before the second, so it returns items 1, 2 and 3." },
+            { "q": "11. devicenames = [\"RT1\",\"RT2\",\"SW1\", \"SW2\"]; hostnames = devicenames + [\"RT3\", \"SW3\"]; del hostnames[3]", "options": ["A. ['RT1','RT2', 'RT3','SW2','SW3']", "B. ['RT1', 'RT2','SW2','RT3','SW3']", "C. ['RT1', 'RT2', 'SW1', 'SW2','SW3']", "D. ['RT1', 'RT2', 'SW1', 'RT3','SW3']"], "answer": "D", "why": "the joined list is ['RT1', 'RT2', 'SW1', 'SW2', 'RT3','SW3']; index 3 is SW2, so SW2 is removed." },
+            { "q": "12. devicenames[-1] - what is the result?", "options": ["A. ['RT2', 'SW1','SW2']", "B. SW1", "C. an error message", "D. SW2", "E. RT1"], "answer": "D", "why": "negative indexes count backwards from the end, so -1 is the last item." },
+            { "q": "13. True or False: logs[-1] retrieves the last item in the list.", "options": ["A. True", "B. False"], "answer": "A", "why": "same rule as above." },
+            { "q": "14. True or False: manifest = [\"part_101\", \"part_240\", \"part_330\"]; the first part is accessed with manifest[0].", "options": ["A. True", "B. False"], "answer": "A", "why": "Python counts from 0, so the first item is index 0." },
+            { "q": "15. sample_list = ['part_1001', 'part_1002', 'part_1003', 'part_1004']. Which code accesses the second item?", "options": ["A. sample_list[1]", "B. sample_list[0]", "C. sample_list[2]", "D. sample_list[-1]"], "answer": "A", "why": "index 0 is the first item, so index 1 is the second." },
+            { "q": "16. ipAddress = {\"R1\":\"10.1.1.1\", \"R2\":\"10.2.2.1\",\"R3\":\"10.3.3.1\"}. Which retrieves the IP of R2?", "options": ["A. ipAddress[R2]", "B. ipAddress{\"R2\"}", "C. ipAddress['R2']", "D. ipAddress{'R2'}"], "answer": "C", "why": "dictionary lookups use square brackets with the key quoted." },
+            { "q": "17. Which built-in data type is ipAddress?", "options": ["A. array", "B. dictionary", "C. list", "D. tuple"], "answer": "B", "why": "curly braces with key: value pairs make a dictionary." },
+            { "q": "18. True or False: accessing employees[\"9999\"] on a dict without that key, with no exception handling, crashes with a KeyError.", "options": ["A. True", "B. False"], "answer": "A", "why": "a missing key raises KeyError, which stops the program unless caught." },
+            { "q": "19. True or False: coordinates = (10.5, 20.0); coordinates[0] = 15.0 reassigns the latitude without raising an error.", "options": ["A. True", "B. False"], "answer": "B", "why": "tuples are immutable, so item assignment raises TypeError." },
+            { "q": "20. delivery_manifest = [\"part_101\", \"part_240\", \"part_330\", \"part_999\"]. What does delivery_manifest[-1] return?", "options": ["A. IndexError", "B. \"part_101\"", "C. \"part_240\"", "D. \"part_999\""], "answer": "D", "why": "-1 is the last element and never errors on a non-empty list." },
+            { "q": "21. text = \"hello\"; the developer runs text[0] = \"j\". What happens?", "options": ["A. Converts text into a list", "B. Raises a runtime error because strings are immutable", "C. Creates ['j','e','l','l','o']", "D. Changes text to \"jello\""], "answer": "B", "why": "strings cannot be edited in place." },
+            { "q": "22. True or False: .split(\",\") returns a list, and \"&\".join(fruits) turns it back into one delimited string.", "options": ["A. True", "B. False"], "answer": "A", "why": "split breaks a string into a list; join glues a list back into a string." },
+            { "q": "23. Multiple answer - strings and lists:", "options": ["A. .split(\",\") returns a list of substrings", "B. Both are iterable sequences", "C. join() combines list elements into one string", "D. String characters can be changed by index assignment", "E. Lists are mutable, strings are immutable"], "answer": "A, B, C, E", "why": "only D is wrong, because strings do not support item assignment." },
+            { "q": "24. y = 2. What is 'Test' * y?", "options": ["A. TypeError", "B. 'TestTest'", "C. 'Test2'", "D. 'Test6'"], "answer": "B", "why": "a string times an integer repeats the string that many times." },
+            { "q": "25. In the ACL script, when is the elif evaluated?", "options": ["A. when the input is a float", "B. when the first print fails", "C. when the if is false", "D. when the input is a string"], "answer": "C", "why": "an elif is only tested after the condition above it fails." },
+            { "q": "26. Which command creates the \"if condition met, else other block\" structure?", "options": ["A. if", "B. for", "C. while", "D. from"], "answer": "A", "why": "if is the conditional; the others loop or import." },
+            { "q": "27. If a condition is not met, which keyword tests another block?", "options": ["A. elif", "B. else", "C. if else", "D. then"], "answer": "A", "why": "elif tests a new condition; else just catches everything left over." },
+            { "q": "28. score = 85 through if >= 90 / elif >= 80 / elif >= 70 / else. What prints?", "options": ["A. Grade: F", "B. Grade: C", "C. Grade: A", "D. Grade: B"], "answer": "D", "why": "85 fails >= 90 but passes >= 80, and the ladder stops at the first true branch." },
+            { "q": "29. multiplier = 5 global; def multiply_number(num): return num * multiplier; print(multiply_number(10))", "options": ["A. 15", "B. NameError", "C. 10", "D. 50"], "answer": "D", "why": "a function can read a global variable it never assigns to, so 10 x 5 = 50." },
+            { "q": "30. Multiple answer - global tax_rate = 0.08, local tax_rate = 0.10 inside calculate_invoice:", "options": ["A. calculate_invoice(100) uses the local 0.10", "B. It permanently overwrites the global", "C. Tuples cannot be modified after creation", "D. The local shadows the global inside the function"], "answer": "A, C, D", "why": "B is wrong because the local assignment only lives inside the function call." },
+            { "q": "31. Value of sysToP after the if 'E1' in i: block appends one match?", "options": ["A. ['sysForm1', 'sysForm2']", "B. ['E1', 'E2']", "C. ['curForm1', 'curForm2']", "D. ['sysForm1']"], "answer": "D", "why": "only the entry containing E1 passes the condition, so one value is appended." },
+            { "q": "32. Scripts in a directory with an __init__.py file create what?", "options": ["A. A standalone module", "B. A package", "C. An exception handler", "D. A standard library module"], "answer": "B", "why": "one file is a module; a directory of modules marked by __init__.py is a package." },
+            { "q": "33. Import only randint from random, aliased as random_num:", "options": ["A. import random.randint as random_num", "B. import randint as random_num from random", "C. from random import random_num as randint", "D. from random import randint as random_num"], "answer": "D", "why": "the order is always from <module> import <name> as <alias>; C has the name and alias swapped." },
+            { "q": "34. Multiple answer - modules and packages:", "options": ["A. A single file of Python code is a module", "B. Importing a function turns a module into a package", "C. from random import randint as random_num imports with an alias", "D. A directory with __init__.py is a package", "E. PIP is the standard package manager, connecting to PyPI"], "answer": "A, C, D, E", "why": "B is wrong; importing changes nothing about how files sit on disk." },
+            { "q": "35. Importing my_module from /custom/path:", "options": ["A. sys.path.append('/custom/path')", "B. sys.path.add('/custom/path')", "C. os.path.append('/custom/path')", "D. path.append('/custom/path')"], "answer": "A", "why": "sys.path is a list, so it takes append(). os.path only handles path strings." },
+            { "q": "36. True or False: a try block with except ZeroDivisionError: prevents the crash when b=0 and allows returning an error string.", "options": ["A. True", "B. False"], "answer": "A", "why": "the except block catches the error so execution continues." },
+            { "q": "37. True or False: a fibonacci(n) using yield creates a generator using lazy evaluation, avoiding large in-memory lists.", "options": ["A. True", "B. False"], "answer": "A", "why": "a generator produces one value at a time instead of building the whole sequence." },
+            { "q": "38. Which statement about sys.stdin / sys.stdout is correct?", "options": ["A. Command-line functions are preferred for stdout output", "B. open('file.txt', 'r') creates a read-only stream that processes standard input", "C. Standard streams are optimal for moving text without loading file operations into memory", "D. os.path manages processes like os.popen()", "E. open() redirects a line-by-line stream to sys.stdin"], "answer": "C", "why": "streams pass text through as it arrives; the others misdescribe open() and os.path." },
+            { "q": "39. True or False: custom exceptions such as NegativeNumberError are created by inheriting from the base Exception class.", "options": ["A. True", "B. False"], "answer": "A", "why": "class NegativeNumberError(Exception): pass is the standard pattern." },
+            { "q": "40. int(\"Two Thousand\") raises an error. Which except block catches it?", "options": ["A. except ValueError:", "B. except TypeError:", "C. except ZeroDivisionError:", "D. except FileNotFoundError:"], "answer": "A", "why": "the argument is the right type (a string) but the wrong value, so int() raises ValueError." },
+            { "q": "41. True or False: an except Exception block catches a ValueError, because Exception sits above almost all runtime errors in the hierarchy.", "options": ["A. True", "B. False"], "answer": "A", "why": "ValueError inherits from Exception, so the broader block catches it." },
+            { "q": "42. What command renames a file?", "options": ["A. cp", "B. mv", "C. dd", "D. rm"], "answer": "B", "why": "mv moves a file, and moving it to a new name in the same folder is a rename." },
+            { "q": "43. From /home/devasc/Documents, mv myfile.sh ../Desktop/myfile2.sh. Final result?", "options": ["A. Moved to /home/devasc/Desktop and renamed myfile2.sh", "B. Copied and renamed in the current directory", "C. Copied to Desktop and renamed", "D. Copied to Desktop, replacing myfile2.sh"], "answer": "A", "why": "mv relocates the file; unlike cp, it leaves nothing behind." },
+            { "q": "44. What command displays the contents of the current directory?", "options": ["A. pwd", "B. cat", "C. ls", "D. ln"], "answer": "C", "why": "pwd prints the path you are in, cat prints a file's contents, ln makes links." },
+            { "q": "45. Which command produced the long listing with drwxr-xr-x, owner, size and date?", "options": ["A. ls -l", "B. ls -lr", "C. ls", "D. ls -a"], "answer": "A", "why": "-l is the long format that adds permissions, owner, group, size and timestamp." },
+            { "q": "46. Current directory /home/devasc/labs/ansible/backups; the user runs cd ../.. Where are they?", "options": ["A. /home", "B. /home/devasc/", "C. /", "D. /home/devasc/labs/ansible", "E. /home/devasc/labs"], "answer": "E", "why": "each .. climbs one level: out of backups, then out of ansible." },
+            { "q": "47. Which command creates an empty file?", "options": ["A. touch", "B. make", "C. create", "D. new"], "answer": "A", "why": "touch creates the file if it does not exist." },
+            { "q": "48. True or False: echo \"I LOVE Linux!\" > linux2.txt appends without overwriting.", "options": ["A. True", "B. False"], "answer": "B", "why": "a single > wipes the file first. Appending needs >>." },
+            { "q": "49. Multiple answer - file redirection:", "options": ["A. echo \"I LOVE Linux!\" > linux2.txt appends without overwriting", "B. cat linux.txt > linux2.txt creates linux2.txt containing \"Linux is AWESOME\"", "C. echo \"Linux is POWERFUL!\" > linux.txt replaces the content", "D. echo \"I LOVE Linux!\" >> linux2.txt appends, preserving content"], "answer": "B, C, D", "why": "A is the only wrong one, for the same reason: one > overwrites." },
+            { "q": "50. True or False: after Permission denied, chmod +x myfile.sh grants execution.", "options": ["A. True", "B. False"], "answer": "A", "why": "the error means the execute bit is missing, and +x adds it." },
+            { "q": "51. Multiple answer - permissions and ownership of myfile.sh:", "options": ["A. chmod +x myfile.sh gives -rwxrwxr-x", "B. sudo chown root myfile.sh changes both user and group to root", "C. After sudo chown root myfile.sh, owner is root, group is devasc", "D. Default permissions are -rw-rw-r--"], "answer": "A, C, D", "why": "B is wrong: chown root file changes only the user. Changing the group too needs chown root:root file." },
+            { "q": "52. -rwxr-xr-- 1 self test 15 Mar 30 21:24 myfile.sh - which two are correct?", "options": ["A. Any user in the self group can read, modify and execute", "B. All others can execute", "C. The user self can modify the file", "D. The user devasc can modify the file", "E. Any user in the test group can execute it"], "answer": "C, E", "why": "read the string in three blocks: owner rwx, group r-x, others r--. So the owner can write, the group can execute, and others can only read." },
+            { "q": "53. A NIC configuration command is refused for lack of permissions. What next?", "options": ["A. Use a different user account", "B. Change chmod permissions on the config file", "C. Use sudo", "D. Identify a different interface"], "answer": "C", "why": "network configuration needs root, and sudo runs the single command with those rights." },
+            { "q": "54. Which command cancels a scheduled shutdown +1?", "options": ["A. shutdown -c", "B. shutdown now", "C. ps -ef | shutdown", "D. sudo apt-get purge shutdown"], "answer": "A", "why": "-c cancels a pending timed shutdown. shutdown now would do the opposite and shut down immediately." },
+            { "q": "55. Multiple answer - administrative utilities:", "options": ["A. ps -ef lists all processes with UID, PID, PPID", "B. more gives page-by-page viewing; Space advances a screen, Enter a line", "C. shutdown -c cancels a scheduled shutdown", "D. ps alone shows only the current terminal's processes"], "answer": "A, B, C, D", "why": "every statement is accurate, so nothing gets left out." },
+            { "q": "56. An administrator issues ps. What is displayed?", "options": ["A. Active processes using CPU time", "B. Current RAM usage", "C. Current SSD usage", "D. Current HDD usage"], "answer": "A", "why": "ps reports processes; memory and disk need tools like free or df." },
+            { "q": "57. Which command lists all processes with UID, PID and PPID?", "options": ["A. ps", "B. ps -ef", "C. ps -r", "D. pwd -ef"], "answer": "B", "why": "-e means every process, -f means full-format columns. Plain ps is limited to your terminal." },
+            { "q": "58. What is the result of ifconfig -a?", "options": ["A. The ARP table", "B. The host routing table", "C. Both active and inactive interfaces", "D. All active interfaces"], "answer": "C", "why": "-a means all, so interfaces that are down appear too." },
+            { "q": "59. After mkdir testdir, cd testdir, systemctl status cron, systemctl set-default ... - current directory?", "options": ["A. /root", "B. /home", "C. testdir", "D. /var", "E. /etc"], "answer": "C", "why": "only cd changes the working directory; systemctl commands leave it alone." },
+            { "q": "60. True or False: sudo apt-get install speed test searches the repository and lists matching packages.", "options": ["A. True", "B. False"], "answer": "B", "why": "install needs the exact package name. Searching is apt-cache search or apt search." },
+            { "q": "61. What does apt-get upgrade perform?", "options": ["A. Every application updates itself", "B. Operating system updates are downloaded and installed", "C. (printed the same as B in the source)", "D. The remote repository is updated"], "answer": "B", "why": "upgrade downloads and installs the newer versions; D describes apt-get update." },
+            { "q": "62. What is the purpose of apt-get upgrade?", "options": ["A. Upgrades all installed packages to their latest versions", "B. Updates the package index lists", "C. Upgrades only the kernel", "D. Removes orphan packages"], "answer": "A", "why": "same idea as above. update refreshes the list of what is available; upgrade actually installs it." },
+            { "q": "63. True or False: sudo apt-get purge speedtest-cli completely removes the package.", "options": ["A. True", "B. False"], "answer": "A", "why": "purge deletes the package and its configuration files." },
+            { "q": "64. Which command uninstalls a package and deletes its config files?", "options": ["A. sudo apt-get purge <package>", "B. sudo apt-get remove <package>", "C. sudo apt-get delete <package>", "D. sudo apt-get uninstall <package>"], "answer": "A", "why": "remove takes out the program but leaves config behind; delete and uninstall are not apt-get commands." },
+            { "q": "65. True or False: sudo apt-get autoremove completely removes an installed package.", "options": ["A. True", "B. False"], "answer": "A", "why": "note that in real use autoremove only clears dependencies nothing needs anymore; purge is the one that fully removes a package." },
+            { "q": "66. Find /etc/passwd entries where the username begins with a digit:", "options": ["A. grep '_[0-9]' /etc/passwd", "B. grep '{0-9}' /etc/passwd", "C. grep '^[0-9]' /etc/passwd", "D. grep '[0-9]' /etc/passwd"], "answer": "C", "why": "^ anchors the match to the start of the line; D would match a digit anywhere in the line." },
+            { "q": "67. Return lines in /etc/passwd ending with false:", "options": ["A. grep 'f..se'", "B. grep '[false]'", "C. grep 'false$'", "D. grep 'false'"], "answer": "C", "why": "$ anchors to the end of the line, the mirror of ^" },
+            { "q": "68. Why does grep 'new*' /etc/passwd match nonexistent as well as news?", "options": ["A. grep ignores vowels in config files", "B. The quotes make new an unrestricted range", "C. * matches zero or more of the preceding character (w), so ne plus zero w s matches", "D. * matches any word starting with n"], "answer": "C", "why": "* in regex applies only to the character just before it, unlike the shell wildcard *." },
+            { "q": "69. True or False: with a global multiplier = 5 and a local multiplier = 10 inside multiply_number(num), the interpreter prioritizes the global value (5).", "options": ["A. True", "B. False"], "answer": "B", "why": "Python checks the local scope first, so the local 10 wins inside the function." },
+            { "q": "70. devices = [\"RT1\", \"RT2\", \"RT3\", \"SW1\", \"SW2\", \"SW3\"] + [\"RT4\", \"SW4\"]; the loop appends to routers if \"R\" in i, else to switches. What is switches?", "options": ["A. ['SW1','SW2','SW3']", "B. ['SW4', 'SW1', 'SW2', 'SW3']", "C. ['SW4']", "D. ['SW4', 'SW3', 'SW2', 'SW1']", "E. ['SW1', 'SW2', 'SW3', 'SW4']"], "answer": "E", "why": "every name containing R (including RT4) goes to routers; the four SW names go to switches in the order they appear, with SW4 last." },
+            { "q": "71. True or False: running pip install requests works because PIP is the standard package manager that connects to the Python Package Index (PyPI).", "options": ["A. True", "B. False"], "answer": "A", "why": "PIP downloads from PyPI, the public repository of third-party Python libraries." },
+            { "q": "72. Which Python feature relies on yield to produce values on the fly using lazy evaluation?", "options": ["A. Packages", "B. Exception hierarchies", "C. Context managers", "D. Generators"], "answer": "D", "why": "a function containing yield is a generator; it hands back one value at a time instead of building the full sequence in memory." },
+            { "q": "73. Multiple answer - object-oriented programming in Python:", "options": ["A. Redefining a method such as take_damage() in a subclass such as Knight demonstrates polymorphism", "B. A class is the blueprint; an object is an instance of that class", "C. Procedural programming relies on encapsulating state and methods inside classes rather than step-by-step functions", "D. Creating a child class such as Car that inherits from a parent class such as Vehicle demonstrates inheritance", "E. An object encapsulates both data (properties) and behavior (methods)"], "answer": "A, B, D, E", "why": "C is backwards: encapsulating state and methods in classes is what object-oriented programming does." },
+            { "q": "74. True or False: in grep 'd..m' /etc/passwd, each dot matches exactly one character, so it finds daem in daemon and dnsm in dnsmasq.", "options": ["A. True", "B. False"], "answer": "A", "why": ". matches any single character, so d..m is a four-character pattern." },
+            { "q": "75. Multiple answer - grep commands and regex behaviour:", "options": ["A. grep 'new*' /etc/passwd only matches the exact four-letter word news", "B. grep 'd..m' /etc/passwd uses dots as wildcards to match patterns like daem and dnsm", "C. grep '^root' /etc/passwd uses ^ to match root only at the beginning of a line", "D. grep 'false$' /etc/passwd uses $ to match lines where false is at the end"], "answer": "B, C, D", "why": "A is wrong because * repeats the preceding w zero or more times, so new* also matches plain ne." },
+            { "q": "76. True or False: in vi, pressing a in command mode inserts text at the cursor's current position.", "options": ["A. True", "B. False"], "answer": "B", "why": "a appends after the cursor. i is the key that inserts at the current position." },
+            { "q": "77. Multiple answer - package administration on the DEVASC VM:", "options": ["A. apt-cache search speed test searches package descriptions locally without needing administrative privileges", "B. sudo apt-get purge speedtest-cli removes the package along with its configuration files", "C. Installing a new package requires root access via sudo apt-get install <package_name>", "D. sudo apt-get update updates all installed packages to their latest versions"], "answer": "A, B, C", "why": "D is wrong: update only refreshes the list of available packages. upgrade is what installs the newer versions." }
         ];
 
-        let shuffledQuestions = [];
-        let userAnswers = {}; 
-        let answeredCount = 0;
-        let missedCount = 0;
-
-        function shuffle(array) {
+        // Utility to shuffle an array (Fisher-Yates)
+        function shuffleArray(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
                 randomIndex = Math.floor(Math.random() * currentIndex);
@@ -370,163 +121,131 @@
             return array;
         }
 
-        function initQuiz() {
-            shuffledQuestions = shuffle(JSON.parse(JSON.stringify(masterQuestionsList)));
-            const container = document.getElementById("questions-container");
-            container.innerHTML = "";
-            userAnswers = {};
-            answeredCount = 0;
-            missedCount = 0;
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = ''; // Clear container
+            
+            // Randomize questions
+            const shuffledQuestions = shuffleArray([...originalQuizData]);
 
-            shuffledQuestions.forEach((q, qIndex) => {
-                userAnswers[qIndex] = [];
-                const isMulti = q.correctAnswers.length > 1;
+            shuffledQuestions.forEach((item, index) => {
+                // Create Card Container
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all";
+                card.dataset.answered = "false";
 
-                const qBlock = document.createElement("div");
-                qBlock.className = "question-block";
-                qBlock.id = `qblock-${qIndex}`;
+                // Question Text
+                const questionText = document.createElement('h2');
+                questionText.className = "text-lg font-semibold mb-4 leading-relaxed text-slate-800";
+                // Strip the original numbering and apply our own dynamic numbering
+                const rawQ = item.q.replace(/^\d+\.\s*/, ''); 
+                questionText.textContent = `${index + 1}. ${rawQ}`;
+                card.appendChild(questionText);
 
-                const qText = document.createElement("h2");
-                qText.className = "question-text";
-                qText.innerText = `${qIndex + 1}. ${q.question}`;
-                qBlock.appendChild(qText);
+                // Options Container
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = "flex flex-col gap-3 options-container";
 
-                if (isMulti) {
-                    const inst = document.createElement("div");
-                    inst.className = "instruction";
-                    inst.innerText = "(Select all that apply, then click Check Answer)";
-                    qBlock.appendChild(inst);
-                }
+                // Map answers string to an array of correct letters (e.g., "A, C, D" -> ["A", "C", "D"])
+                const correctLetters = item.answer.split(',').map(s => s.trim());
 
-                const optionsGrid = document.createElement("div");
-                optionsGrid.className = "options-grid";
+                item.options.forEach((optText, optIndex) => {
+                    const optBtn = document.createElement('button');
+                    optBtn.className = "text-left w-full p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer text-slate-700 bg-white group";
+                    
+                    const optContent = document.createElement('span');
+                    optContent.className = "block group-hover:translate-x-1 transition-transform duration-200";
+                    optContent.textContent = optText;
+                    
+                    optBtn.appendChild(optContent);
 
-                q.options.forEach((optText, optIndex) => {
-                    const btn = document.createElement("button");
-                    btn.className = "option-btn";
-                    btn.id = `btn-${qIndex}-${optIndex}`;
-                    btn.innerText = optText;
-                    btn.onclick = () => toggleOption(qIndex, optIndex, isMulti);
-                    optionsGrid.appendChild(btn);
+                    // Click Event
+                    optBtn.addEventListener('click', () => {
+                        handleOptionClick(card, item, correctLetters, optIndex, optionsDiv);
+                    });
+
+                    optionsDiv.appendChild(optBtn);
                 });
 
-                qBlock.appendChild(optionsGrid);
+                card.appendChild(optionsDiv);
 
-                if (isMulti) {
-                    const checkBtn = document.createElement("button");
-                    checkBtn.className = "action-btn check-btn";
-                    checkBtn.id = `check-btn-${qIndex}`;
-                    checkBtn.innerText = "Check Answer";
-                    checkBtn.onclick = () => evaluateQuestion(qIndex);
-                    qBlock.appendChild(checkBtn);
-                }
+                // Explanation Container (Hidden by default)
+                const explanationDiv = document.createElement('div');
+                explanationDiv.className = "explanation hidden mt-6 p-4 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg text-slate-600 italic text-sm";
+                explanationDiv.innerHTML = `<strong class="not-italic text-slate-700 block mb-1">Explanation:</strong> ${item.why}`;
+                card.appendChild(explanationDiv);
 
-                container.appendChild(qBlock);
+                container.appendChild(card);
             });
-        }
-
-        function toggleOption(qIndex, optIndex, isMulti) {
-            const qBlock = document.getElementById(`qblock-${qIndex}`);
-            if (qBlock.classList.contains("answered")) return; 
-
-            let answers = userAnswers[qIndex];
-
-            if (isMulti) {
-                if (answers.includes(optIndex)) {
-                    answers.splice(answers.indexOf(optIndex), 1);
-                } else {
-                    answers.push(optIndex);
-                }
-                updateOptionUI(qIndex);
-            } else {
-                answers.length = 0; 
-                answers.push(optIndex);
-                updateOptionUI(qIndex);
-                evaluateQuestion(qIndex); 
-            }
-        }
-
-        function updateOptionUI(qIndex) {
-            const q = shuffledQuestions[qIndex];
-            const answers = userAnswers[qIndex];
-
-            q.options.forEach((_, optIndex) => {
-                const btn = document.getElementById(`btn-${qIndex}-${optIndex}`);
-                if (answers.includes(optIndex)) {
-                    btn.classList.add("selected");
-                } else {
-                    btn.classList.remove("selected");
-                }
-            });
-        }
-
-        function evaluateQuestion(qIndex) {
-            const qBlock = document.getElementById(`qblock-${qIndex}`);
-            if (qBlock.classList.contains("answered")) return; 
             
-            const selected = userAnswers[qIndex];
-            if (selected.length === 0) return; 
-
-            qBlock.classList.add("answered");
-            const q = shuffledQuestions[qIndex];
-            const correct = q.correctAnswers;
-
-            const isCorrect = selected.length === correct.length && selected.every(val => correct.includes(val));
-
-            q.options.forEach((_, optIndex) => {
-                const btn = document.getElementById(`btn-${qIndex}-${optIndex}`);
-                btn.disabled = true; 
-                
-                if (correct.includes(optIndex)) {
-                    btn.classList.add("correct");
-                }
-                if (selected.includes(optIndex) && !correct.includes(optIndex)) {
-                    btn.classList.add("wrong");
-                }
-            });
-
-            if (isCorrect) {
-                qBlock.classList.add("status-correct");
-            } else {
-                missedCount++;
-                qBlock.classList.add("status-wrong");
-            }
-
-            const checkBtn = document.getElementById(`check-btn-${qIndex}`);
-            if (checkBtn) checkBtn.style.display = "none";
-
-            answeredCount++;
-            checkQuizCompletion();
-        }
-
-        function checkQuizCompletion() {
-            if (answeredCount === shuffledQuestions.length) {
-                document.getElementById("results-area").style.display = "block";
-                
-                const scoreDisplay = document.getElementById("score-display");
-                scoreDisplay.innerText = `Quiz Complete! You scored ${shuffledQuestions.length - missedCount} out of ${shuffledQuestions.length}.`;
-
-                if (missedCount > 0) {
-                    const wrongBtn = document.getElementById("show-wrong-btn");
-                    wrongBtn.style.display = "inline-block";
-                    wrongBtn.innerText = `Show Only Mistakes (${missedCount})`;
-                }
-                
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            }
-        }
-
-        function showWrongAnswers() {
-            const correctBlocks = document.querySelectorAll(".status-correct");
-            correctBlocks.forEach(block => {
-                block.style.display = "none";
-            });
-
-            document.getElementById("show-wrong-btn").style.display = "none";
+            // Scroll to top on reset
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.onload = initQuiz;
+        function handleOptionClick(card, itemData, correctLetters, selectedIndex, optionsDiv) {
+            // Prevent multiple clicks on the same question
+            if (card.dataset.answered === "true") return;
+            card.dataset.answered = "true";
+
+            const optionButtons = optionsDiv.children;
+
+            for (let i = 0; i < optionButtons.length; i++) {
+                const btn = optionButtons[i];
+                const optText = itemData.options[i];
+                // Extract the letter from the option text (e.g. "A. ..." -> "A")
+                const optLetter = optText.charAt(0);
+                const isCorrect = correctLetters.includes(optLetter);
+                const isSelected = (i === selectedIndex);
+
+                // Remove hover and pointer effects
+                btn.classList.remove('hover:bg-slate-50', 'cursor-pointer');
+                btn.classList.add('cursor-default');
+                const spanInner = btn.querySelector('span');
+                spanInner.classList.remove('group-hover:translate-x-1');
+
+                // Apply logic colors
+                if (isCorrect) {
+                    // Correct answers are highlighted in green
+                    btn.classList.remove('bg-white', 'border-slate-200', 'text-slate-700');
+                    btn.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-800', 'ring-1', 'ring-emerald-500');
+                    
+                    // Add check icon
+                    spanInner.innerHTML = `<span class="font-bold mr-1">✓</span> ${optText}`;
+                } else if (isSelected && !isCorrect) {
+                    // Incorrect selected answer is highlighted in red
+                    btn.classList.remove('bg-white', 'border-slate-200', 'text-slate-700');
+                    btn.classList.add('bg-red-50', 'border-red-500', 'text-red-800');
+                    
+                    // Add cross icon
+                    spanInner.innerHTML = `<span class="font-bold mr-1">✗</span> ${optText}`;
+                } else {
+                    // Unselected wrong options fade out slightly
+                    btn.classList.add('opacity-50');
+                }
+            }
+
+            // Reveal the explanation block
+            const explanationDiv = card.querySelector('.explanation');
+            explanationDiv.classList.remove('hidden');
+            
+            // Add a subtle border highlight to the card based on whether they got it completely right
+            const clickedLetter = itemData.options[selectedIndex].charAt(0);
+            if(correctLetters.includes(clickedLetter) && correctLetters.length === 1) {
+                 card.classList.add('border-emerald-300', 'shadow-emerald-100');
+            } else if (!correctLetters.includes(clickedLetter)){
+                 card.classList.add('border-red-300', 'shadow-red-100');
+            } else {
+                 // For multi-select, if they clicked one of the correct ones, we'll mark as partial/correct visually on card border
+                 card.classList.add('border-blue-300', 'shadow-blue-100');
+            }
+        }
+
+        // Reset Button listener
+        document.getElementById('reset-btn').addEventListener('click', renderQuiz);
+
+        // Initialize quiz on load
+        window.addEventListener('DOMContentLoaded', renderQuiz);
+
     </script>
 </body>
 </html>
