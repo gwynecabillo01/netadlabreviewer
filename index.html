@@ -19,12 +19,15 @@ h1{font-size:1.4rem;margin:0 0 4px}.sub{color:var(--mut);font-size:.9rem;margin-
 .o.ok{background:var(--ok);border-color:var(--okb)}.o.no{background:var(--no);border-color:var(--nob)}
 .ex{margin-top:12px;border-top:1px dashed var(--bd);padding-top:10px;font-size:.93rem}
 .ex p{margin:6px 0}.g{color:var(--okb);font-weight:600}.r{color:var(--nob);font-weight:600}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}.nb{min-width:40px;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx);cursor:pointer;font:inherit;font-size:.85rem}.nb.ok{background:var(--ok);border-color:var(--okb)}.nb.no{background:var(--no);border-color:var(--nob)}#fl{position:fixed;right:12px;bottom:12px;display:flex;flex-direction:column;gap:6px}
 </style></head><body><div class="w">
 <h1>ITPEC Fundamental IT Engineer – Subject A</h1>
 <div class="sub">Click an answer to see the correct one with a full explanation.</div>
 <div class="bar" id="tabs"></div>
 <div class="score" id="score"></div>
+<div class="nav" id="nav"></div>
 <div id="list"></div>
+<div id="fl"><button class="tab" onclick="scrollTo({top:0,behavior:'smooth'})">↑ Top</button><button class="tab" onclick="document.querySelector('#list').lastElementChild.previousElementSibling.scrollIntoView({behavior:'smooth'})">↓ Bottom</button></div>
 </div>
 <script src="questions-2025S.js"></script>
 <script src="questions-2025A.js"></script>
@@ -60,11 +63,12 @@ let cur=Object.keys(D)[0],done={},showEx=true,open={};
 const $=s=>document.querySelector(s),L="abcd";
 function tabs(){$("#tabs").innerHTML="";Object.keys(D).forEach(k=>{const b=document.createElement("button");b.className="tab"+(k==cur?" on":"");b.textContent=k;b.onclick=()=>{cur=k;tabs();draw()};$("#tabs").append(b)});const s=document.createElement("button");s.className="btn";s.textContent="Shuffle questions";s.onclick=()=>{const a=D[cur];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}Object.keys(done).forEach(x=>{if(x.startsWith(cur))delete done[x]});draw()};$("#tabs").append(s);const h=document.createElement("button");h.className="tab";h.textContent=showEx?"Hide explanations":"Show explanations";h.onclick=()=>{showEx=!showEx;tabs();draw()};$("#tabs").append(h)}
 function draw(){const qs=D[cur],list=$("#list");list.innerHTML="";let c=0,t=0;
-qs.forEach((q,i)=>{const d=document.createElement("div");d.className="q";d.innerHTML=`<p class="qt"><span class="qn">Q${q.n}.</span> ${q.t}</p>`;
+qs.forEach((q,i)=>{const d=document.createElement("div");d.className="q";d.id="q"+q.n;d.innerHTML=`<p class="qt"><span class="qn">Q${q.n}.</span> ${q.t}</p>`;
 q.o.forEach((o,k)=>{const b=document.createElement("button");b.className="o";b.textContent=L[k]+") "+o;b.onclick=()=>pick(q,d,k);d.append(b)});list.append(d);
 const key=cur+q.n;if(done[key]!==undefined)pick(q,d,done[key],true)});
 const fb=document.createElement("button");fb.className="tab on";fb.textContent="Finish and see summary";fb.onclick=summary;list.append(fb);const sm=document.createElement("div");sm.id="sum";sm.style.marginTop="16px";list.append(sm);upd()}
-function upd(){const qs=D[cur];let t=0,c=0;qs.forEach(q=>{const v=done[cur+q.n];if(v!==undefined){t++;if(v==q.a)c++}});$("#score").textContent=`${cur}: ${qs.length} of 60 questions loaded · answered ${t} · correct ${c}`}
+function nav(qs){$("#nav").innerHTML="";qs.forEach(q=>{const v=done[cur+q.n],b=document.createElement("button");b.className="nb"+(v===undefined?"":v==q.a?" ok":" no");b.textContent=q.n;b.title="Go to Q"+q.n;b.onclick=()=>$("#q"+q.n).scrollIntoView({behavior:"smooth",block:"start"});$("#nav").append(b)})}
+function upd(){const qs=D[cur];nav(qs);let t=0,c=0;qs.forEach(q=>{const v=done[cur+q.n];if(v!==undefined){t++;if(v==q.a)c++}});$("#score").textContent=`${cur}: ${qs.length} of 60 questions loaded · answered ${t} · correct ${c}`}
 function pick(q,d,k,re){done[cur+q.n]=k;const bs=d.querySelectorAll(".o");
 bs.forEach((b,i)=>{b.disabled=true;if(i==q.a)b.classList.add("ok");else if(i==k)b.classList.add("no")});
 d.querySelector(".ex")?.remove();const ex=document.createElement("div");ex.className="ex";
