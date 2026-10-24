@@ -1,251 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Bank Reviewer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Tailwind slate-50 */
-        }
-    </style>
-</head>
-<body class="text-slate-800 antialiased pb-24">
-
-    <!-- Fixed Header -->
-    <header class="fixed top-0 w-full bg-slate-900 text-white px-4 py-3 shadow-lg z-50 flex justify-between items-center h-16">
-        <h1 class="text-lg md:text-xl font-bold truncate pr-4">Exam Bank Reviewer</h1>
-        <button id="reset-btn" class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm transition shadow shadow-blue-500/30 whitespace-nowrap">
-            Reset Reviewer
-        </button>
-    </header>
-
-    <!-- Main Content -->
-    <main id="quiz-container" class="mt-20 max-w-4xl mx-auto px-4 flex flex-col gap-6">
-        <!-- Question cards will be injected here via JavaScript -->
-    </main>
-
-    <script>
-        // The complete set of questions provided
-        const originalQuizData = [
-            { "q": "1. Which command checks the version of the running Python package?", "options": ["A. python3 -i", "B. python3 -q", "C. python3 --v", "D. python3 -V"], "answer": "D", "why": "capital V prints the version. -i forces interactive mode, -q hides the banner, --v is not valid." },
-            { "q": "2. addition = 22 + 10, then print(addition). What is displayed?", "options": ["A. (syntaxerror)-...", "B. 32", "C. nothing", "D. [22] + [10]"], "answer": "B", "why": "+ on two integers adds them, and print() shows the result." },
-            { "q": "3. type(True) what data type is reported?", "options": ["A. string", "B. Boolean", "C. integer", "D. float"], "answer": "B", "why": "True and False are Booleans (<class 'bool'>)." },
-            { "q": "4. type(PAGENAME) where the variable holds text. What is printed?", "options": ["A. <class 'str'>", "B. <class 'type'>", "C. <class 'int'>", "D. <class 'dict'>", "E. <class 'tuple'>"], "answer": "A", "why": "anything in quotes is a string." },
-            { "q": "5. Which Python function is used to display output?", "options": ["A. print", "B. for", "C. while", "D. if"], "answer": "A", "why": "for and while loop, if branches; only print outputs." },
-            { "q": "6. total_minutes = 130; hours = total_minutes // 60. What is stored in hours?", "options": ["A. 2", "B. 10", "C. 2.17", "D. 2.1666666666666665"], "answer": "A", "why": "// is floor division: it drops the remainder and returns a whole number." },
-            { "q": "7. minutes = total_minutes % 60 with total_minutes = 130. What is minutes?", "options": ["A. 10", "B. 2", "C. 60", "D. 0"], "answer": "A", "why": "% returns the remainder: 130 = (2 * 60) + 10." },
-            { "q": "8. 10 // 3 - what value results?", "options": ["A. 3", "B. 3.33", "C. 1", "D. 3.0"], "answer": "A", "why": "floor division of two ints gives an int, not a float." },
-            { "q": "9. A Python source file is run. How does the system process the code?", "options": ["A. Translates and runs it line-by-line at runtime", "B. Converts it into natural human language", "C. Compiles all source into machine code first", "D. Sends raw text to the CPU"], "answer": "A", "why": "Python is interpreted; there is no separate compile step like C." },
-            { "q": "10. fruits = [\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"]; print(fruits[1:4])", "options": ["A. [\"apple\", \"banana\", \"cherry\"]", "B. [\"apple\", \"elderberry\"]", "C. [\"banana\", \"cherry\", \"date\", \"elderberry\"]", "D. [\"banana\", \"cherry\", \"date\"]"], "answer": "D", "why": "a slice starts at the first index and stops before the second, so it returns items 1, 2 and 3." },
-            { "q": "11. devicenames = [\"RT1\",\"RT2\",\"SW1\", \"SW2\"]; hostnames = devicenames + [\"RT3\", \"SW3\"]; del hostnames[3]", "options": ["A. ['RT1','RT2', 'RT3','SW2','SW3']", "B. ['RT1', 'RT2','SW2','RT3','SW3']", "C. ['RT1', 'RT2', 'SW1', 'SW2','SW3']", "D. ['RT1', 'RT2', 'SW1', 'RT3','SW3']"], "answer": "D", "why": "the joined list is ['RT1', 'RT2', 'SW1', 'SW2', 'RT3','SW3']; index 3 is SW2, so SW2 is removed." },
-            { "q": "12. devicenames[-1] - what is the result?", "options": ["A. ['RT2', 'SW1','SW2']", "B. SW1", "C. an error message", "D. SW2", "E. RT1"], "answer": "D", "why": "negative indexes count backwards from the end, so -1 is the last item." },
-            { "q": "13. True or False: logs[-1] retrieves the last item in the list.", "options": ["A. True", "B. False"], "answer": "A", "why": "same rule as above." },
-            { "q": "14. True or False: manifest = [\"part_101\", \"part_240\", \"part_330\"]; the first part is accessed with manifest[0].", "options": ["A. True", "B. False"], "answer": "A", "why": "Python counts from 0, so the first item is index 0." },
-            { "q": "15. sample_list = ['part_1001', 'part_1002', 'part_1003', 'part_1004']. Which code accesses the second item?", "options": ["A. sample_list[1]", "B. sample_list[0]", "C. sample_list[2]", "D. sample_list[-1]"], "answer": "A", "why": "index 0 is the first item, so index 1 is the second." },
-            { "q": "16. ipAddress = {\"R1\":\"10.1.1.1\", \"R2\":\"10.2.2.1\",\"R3\":\"10.3.3.1\"}. Which retrieves the IP of R2?", "options": ["A. ipAddress[R2]", "B. ipAddress{\"R2\"}", "C. ipAddress['R2']", "D. ipAddress{'R2'}"], "answer": "C", "why": "dictionary lookups use square brackets with the key quoted." },
-            { "q": "17. Which built-in data type is ipAddress?", "options": ["A. array", "B. dictionary", "C. list", "D. tuple"], "answer": "B", "why": "curly braces with key: value pairs make a dictionary." },
-            { "q": "18. True or False: accessing employees[\"9999\"] on a dict without that key, with no exception handling, crashes with a KeyError.", "options": ["A. True", "B. False"], "answer": "A", "why": "a missing key raises KeyError, which stops the program unless caught." },
-            { "q": "19. True or False: coordinates = (10.5, 20.0); coordinates[0] = 15.0 reassigns the latitude without raising an error.", "options": ["A. True", "B. False"], "answer": "B", "why": "tuples are immutable, so item assignment raises TypeError." },
-            { "q": "20. delivery_manifest = [\"part_101\", \"part_240\", \"part_330\", \"part_999\"]. What does delivery_manifest[-1] return?", "options": ["A. IndexError", "B. \"part_101\"", "C. \"part_240\"", "D. \"part_999\""], "answer": "D", "why": "-1 is the last element and never errors on a non-empty list." },
-            { "q": "21. text = \"hello\"; the developer runs text[0] = \"j\". What happens?", "options": ["A. Converts text into a list", "B. Raises a runtime error because strings are immutable", "C. Creates ['j','e','l','l','o']", "D. Changes text to \"jello\""], "answer": "B", "why": "strings cannot be edited in place." },
-            { "q": "22. True or False: .split(\",\") returns a list, and \"&\".join(fruits) turns it back into one delimited string.", "options": ["A. True", "B. False"], "answer": "A", "why": "split breaks a string into a list; join glues a list back into a string." },
-            { "q": "23. Multiple answer - strings and lists:", "options": ["A. .split(\",\") returns a list of substrings", "B. Both are iterable sequences", "C. join() combines list elements into one string", "D. String characters can be changed by index assignment", "E. Lists are mutable, strings are immutable"], "answer": "A, B, C, E", "why": "only D is wrong, because strings do not support item assignment." },
-            { "q": "24. y = 2. What is 'Test' * y?", "options": ["A. TypeError", "B. 'TestTest'", "C. 'Test2'", "D. 'Test6'"], "answer": "B", "why": "a string times an integer repeats the string that many times." },
-            { "q": "25. In the ACL script, when is the elif evaluated?", "options": ["A. when the input is a float", "B. when the first print fails", "C. when the if is false", "D. when the input is a string"], "answer": "C", "why": "an elif is only tested after the condition above it fails." },
-            { "q": "26. Which command creates the \"if condition met, else other block\" structure?", "options": ["A. if", "B. for", "C. while", "D. from"], "answer": "A", "why": "if is the conditional; the others loop or import." },
-            { "q": "27. If a condition is not met, which keyword tests another block?", "options": ["A. elif", "B. else", "C. if else", "D. then"], "answer": "A", "why": "elif tests a new condition; else just catches everything left over." },
-            { "q": "28. score = 85 through if >= 90 / elif >= 80 / elif >= 70 / else. What prints?", "options": ["A. Grade: F", "B. Grade: C", "C. Grade: A", "D. Grade: B"], "answer": "D", "why": "85 fails >= 90 but passes >= 80, and the ladder stops at the first true branch." },
-            { "q": "29. multiplier = 5 global; def multiply_number(num): return num * multiplier; print(multiply_number(10))", "options": ["A. 15", "B. NameError", "C. 10", "D. 50"], "answer": "D", "why": "a function can read a global variable it never assigns to, so 10 x 5 = 50." },
-            { "q": "30. Multiple answer - global tax_rate = 0.08, local tax_rate = 0.10 inside calculate_invoice:", "options": ["A. calculate_invoice(100) uses the local 0.10", "B. It permanently overwrites the global", "C. Tuples cannot be modified after creation", "D. The local shadows the global inside the function"], "answer": "A, C, D", "why": "B is wrong because the local assignment only lives inside the function call." },
-            { "q": "31. Value of sysToP after the if 'E1' in i: block appends one match?", "options": ["A. ['sysForm1', 'sysForm2']", "B. ['E1', 'E2']", "C. ['curForm1', 'curForm2']", "D. ['sysForm1']"], "answer": "D", "why": "only the entry containing E1 passes the condition, so one value is appended." },
-            { "q": "32. Scripts in a directory with an __init__.py file create what?", "options": ["A. A standalone module", "B. A package", "C. An exception handler", "D. A standard library module"], "answer": "B", "why": "one file is a module; a directory of modules marked by __init__.py is a package." },
-            { "q": "33. Import only randint from random, aliased as random_num:", "options": ["A. import random.randint as random_num", "B. import randint as random_num from random", "C. from random import random_num as randint", "D. from random import randint as random_num"], "answer": "D", "why": "the order is always from <module> import <name> as <alias>; C has the name and alias swapped." },
-            { "q": "34. Multiple answer - modules and packages:", "options": ["A. A single file of Python code is a module", "B. Importing a function turns a module into a package", "C. from random import randint as random_num imports with an alias", "D. A directory with __init__.py is a package", "E. PIP is the standard package manager, connecting to PyPI"], "answer": "A, C, D, E", "why": "B is wrong; importing changes nothing about how files sit on disk." },
-            { "q": "35. Importing my_module from /custom/path:", "options": ["A. sys.path.append('/custom/path')", "B. sys.path.add('/custom/path')", "C. os.path.append('/custom/path')", "D. path.append('/custom/path')"], "answer": "A", "why": "sys.path is a list, so it takes append(). os.path only handles path strings." },
-            { "q": "36. True or False: a try block with except ZeroDivisionError: prevents the crash when b=0 and allows returning an error string.", "options": ["A. True", "B. False"], "answer": "A", "why": "the except block catches the error so execution continues." },
-            { "q": "37. True or False: a fibonacci(n) using yield creates a generator using lazy evaluation, avoiding large in-memory lists.", "options": ["A. True", "B. False"], "answer": "A", "why": "a generator produces one value at a time instead of building the whole sequence." },
-            { "q": "38. Which statement about sys.stdin / sys.stdout is correct?", "options": ["A. Command-line functions are preferred for stdout output", "B. open('file.txt', 'r') creates a read-only stream that processes standard input", "C. Standard streams are optimal for moving text without loading file operations into memory", "D. os.path manages processes like os.popen()", "E. open() redirects a line-by-line stream to sys.stdin"], "answer": "C", "why": "streams pass text through as it arrives; the others misdescribe open() and os.path." },
-            { "q": "39. True or False: custom exceptions such as NegativeNumberError are created by inheriting from the base Exception class.", "options": ["A. True", "B. False"], "answer": "A", "why": "class NegativeNumberError(Exception): pass is the standard pattern." },
-            { "q": "40. int(\"Two Thousand\") raises an error. Which except block catches it?", "options": ["A. except ValueError:", "B. except TypeError:", "C. except ZeroDivisionError:", "D. except FileNotFoundError:"], "answer": "A", "why": "the argument is the right type (a string) but the wrong value, so int() raises ValueError." },
-            { "q": "41. True or False: an except Exception block catches a ValueError, because Exception sits above almost all runtime errors in the hierarchy.", "options": ["A. True", "B. False"], "answer": "A", "why": "ValueError inherits from Exception, so the broader block catches it." },
-            { "q": "42. What command renames a file?", "options": ["A. cp", "B. mv", "C. dd", "D. rm"], "answer": "B", "why": "mv moves a file, and moving it to a new name in the same folder is a rename." },
-            { "q": "43. From /home/devasc/Documents, mv myfile.sh ../Desktop/myfile2.sh. Final result?", "options": ["A. Moved to /home/devasc/Desktop and renamed myfile2.sh", "B. Copied and renamed in the current directory", "C. Copied to Desktop and renamed", "D. Copied to Desktop, replacing myfile2.sh"], "answer": "A", "why": "mv relocates the file; unlike cp, it leaves nothing behind." },
-            { "q": "44. What command displays the contents of the current directory?", "options": ["A. pwd", "B. cat", "C. ls", "D. ln"], "answer": "C", "why": "pwd prints the path you are in, cat prints a file's contents, ln makes links." },
-            { "q": "45. Which command produced the long listing with drwxr-xr-x, owner, size and date?", "options": ["A. ls -l", "B. ls -lr", "C. ls", "D. ls -a"], "answer": "A", "why": "-l is the long format that adds permissions, owner, group, size and timestamp." },
-            { "q": "46. Current directory /home/devasc/labs/ansible/backups; the user runs cd ../.. Where are they?", "options": ["A. /home", "B. /home/devasc/", "C. /", "D. /home/devasc/labs/ansible", "E. /home/devasc/labs"], "answer": "E", "why": "each .. climbs one level: out of backups, then out of ansible." },
-            { "q": "47. Which command creates an empty file?", "options": ["A. touch", "B. make", "C. create", "D. new"], "answer": "A", "why": "touch creates the file if it does not exist." },
-            { "q": "48. True or False: echo \"I LOVE Linux!\" > linux2.txt appends without overwriting.", "options": ["A. True", "B. False"], "answer": "B", "why": "a single > wipes the file first. Appending needs >>." },
-            { "q": "49. Multiple answer - file redirection:", "options": ["A. echo \"I LOVE Linux!\" > linux2.txt appends without overwriting", "B. cat linux.txt > linux2.txt creates linux2.txt containing \"Linux is AWESOME\"", "C. echo \"Linux is POWERFUL!\" > linux.txt replaces the content", "D. echo \"I LOVE Linux!\" >> linux2.txt appends, preserving content"], "answer": "B, C, D", "why": "A is the only wrong one, for the same reason: one > overwrites." },
-            { "q": "50. True or False: after Permission denied, chmod +x myfile.sh grants execution.", "options": ["A. True", "B. False"], "answer": "A", "why": "the error means the execute bit is missing, and +x adds it." },
-            { "q": "51. Multiple answer - permissions and ownership of myfile.sh:", "options": ["A. chmod +x myfile.sh gives -rwxrwxr-x", "B. sudo chown root myfile.sh changes both user and group to root", "C. After sudo chown root myfile.sh, owner is root, group is devasc", "D. Default permissions are -rw-rw-r--"], "answer": "A, C, D", "why": "B is wrong: chown root file changes only the user. Changing the group too needs chown root:root file." },
-            { "q": "52. -rwxr-xr-- 1 self test 15 Mar 30 21:24 myfile.sh - which two are correct?", "options": ["A. Any user in the self group can read, modify and execute", "B. All others can execute", "C. The user self can modify the file", "D. The user devasc can modify the file", "E. Any user in the test group can execute it"], "answer": "C, E", "why": "read the string in three blocks: owner rwx, group r-x, others r--. So the owner can write, the group can execute, and others can only read." },
-            { "q": "53. A NIC configuration command is refused for lack of permissions. What next?", "options": ["A. Use a different user account", "B. Change chmod permissions on the config file", "C. Use sudo", "D. Identify a different interface"], "answer": "C", "why": "network configuration needs root, and sudo runs the single command with those rights." },
-            { "q": "54. Which command cancels a scheduled shutdown +1?", "options": ["A. shutdown -c", "B. shutdown now", "C. ps -ef | shutdown", "D. sudo apt-get purge shutdown"], "answer": "A", "why": "-c cancels a pending timed shutdown. shutdown now would do the opposite and shut down immediately." },
-            { "q": "55. Multiple answer - administrative utilities:", "options": ["A. ps -ef lists all processes with UID, PID, PPID", "B. more gives page-by-page viewing; Space advances a screen, Enter a line", "C. shutdown -c cancels a scheduled shutdown", "D. ps alone shows only the current terminal's processes"], "answer": "A, B, C, D", "why": "every statement is accurate, so nothing gets left out." },
-            { "q": "56. An administrator issues ps. What is displayed?", "options": ["A. Active processes using CPU time", "B. Current RAM usage", "C. Current SSD usage", "D. Current HDD usage"], "answer": "A", "why": "ps reports processes; memory and disk need tools like free or df." },
-            { "q": "57. Which command lists all processes with UID, PID and PPID?", "options": ["A. ps", "B. ps -ef", "C. ps -r", "D. pwd -ef"], "answer": "B", "why": "-e means every process, -f means full-format columns. Plain ps is limited to your terminal." },
-            { "q": "58. What is the result of ifconfig -a?", "options": ["A. The ARP table", "B. The host routing table", "C. Both active and inactive interfaces", "D. All active interfaces"], "answer": "C", "why": "-a means all, so interfaces that are down appear too." },
-            { "q": "59. After mkdir testdir, cd testdir, systemctl status cron, systemctl set-default ... - current directory?", "options": ["A. /root", "B. /home", "C. testdir", "D. /var", "E. /etc"], "answer": "C", "why": "only cd changes the working directory; systemctl commands leave it alone." },
-            { "q": "60. True or False: sudo apt-get install speed test searches the repository and lists matching packages.", "options": ["A. True", "B. False"], "answer": "B", "why": "install needs the exact package name. Searching is apt-cache search or apt search." },
-            { "q": "61. What does apt-get upgrade perform?", "options": ["A. Every application updates itself", "B. Operating system updates are downloaded and installed", "C. (printed the same as B in the source)", "D. The remote repository is updated"], "answer": "B", "why": "upgrade downloads and installs the newer versions; D describes apt-get update." },
-            { "q": "62. What is the purpose of apt-get upgrade?", "options": ["A. Upgrades all installed packages to their latest versions", "B. Updates the package index lists", "C. Upgrades only the kernel", "D. Removes orphan packages"], "answer": "A", "why": "same idea as above. update refreshes the list of what is available; upgrade actually installs it." },
-            { "q": "63. True or False: sudo apt-get purge speedtest-cli completely removes the package.", "options": ["A. True", "B. False"], "answer": "A", "why": "purge deletes the package and its configuration files." },
-            { "q": "64. Which command uninstalls a package and deletes its config files?", "options": ["A. sudo apt-get purge <package>", "B. sudo apt-get remove <package>", "C. sudo apt-get delete <package>", "D. sudo apt-get uninstall <package>"], "answer": "A", "why": "remove takes out the program but leaves config behind; delete and uninstall are not apt-get commands." },
-            { "q": "65. True or False: sudo apt-get autoremove completely removes an installed package.", "options": ["A. True", "B. False"], "answer": "A", "why": "note that in real use autoremove only clears dependencies nothing needs anymore; purge is the one that fully removes a package." },
-            { "q": "66. Find /etc/passwd entries where the username begins with a digit:", "options": ["A. grep '_[0-9]' /etc/passwd", "B. grep '{0-9}' /etc/passwd", "C. grep '^[0-9]' /etc/passwd", "D. grep '[0-9]' /etc/passwd"], "answer": "C", "why": "^ anchors the match to the start of the line; D would match a digit anywhere in the line." },
-            { "q": "67. Return lines in /etc/passwd ending with false:", "options": ["A. grep 'f..se'", "B. grep '[false]'", "C. grep 'false$'", "D. grep 'false'"], "answer": "C", "why": "$ anchors to the end of the line, the mirror of ^" },
-            { "q": "68. Why does grep 'new*' /etc/passwd match nonexistent as well as news?", "options": ["A. grep ignores vowels in config files", "B. The quotes make new an unrestricted range", "C. * matches zero or more of the preceding character (w), so ne plus zero w s matches", "D. * matches any word starting with n"], "answer": "C", "why": "* in regex applies only to the character just before it, unlike the shell wildcard *." },
-            { "q": "69. True or False: with a global multiplier = 5 and a local multiplier = 10 inside multiply_number(num), the interpreter prioritizes the global value (5).", "options": ["A. True", "B. False"], "answer": "B", "why": "Python checks the local scope first, so the local 10 wins inside the function." },
-            { "q": "70. devices = [\"RT1\", \"RT2\", \"RT3\", \"SW1\", \"SW2\", \"SW3\"] + [\"RT4\", \"SW4\"]; the loop appends to routers if \"R\" in i, else to switches. What is switches?", "options": ["A. ['SW1','SW2','SW3']", "B. ['SW4', 'SW1', 'SW2', 'SW3']", "C. ['SW4']", "D. ['SW4', 'SW3', 'SW2', 'SW1']", "E. ['SW1', 'SW2', 'SW3', 'SW4']"], "answer": "E", "why": "every name containing R (including RT4) goes to routers; the four SW names go to switches in the order they appear, with SW4 last." },
-            { "q": "71. True or False: running pip install requests works because PIP is the standard package manager that connects to the Python Package Index (PyPI).", "options": ["A. True", "B. False"], "answer": "A", "why": "PIP downloads from PyPI, the public repository of third-party Python libraries." },
-            { "q": "72. Which Python feature relies on yield to produce values on the fly using lazy evaluation?", "options": ["A. Packages", "B. Exception hierarchies", "C. Context managers", "D. Generators"], "answer": "D", "why": "a function containing yield is a generator; it hands back one value at a time instead of building the full sequence in memory." },
-            { "q": "73. Multiple answer - object-oriented programming in Python:", "options": ["A. Redefining a method such as take_damage() in a subclass such as Knight demonstrates polymorphism", "B. A class is the blueprint; an object is an instance of that class", "C. Procedural programming relies on encapsulating state and methods inside classes rather than step-by-step functions", "D. Creating a child class such as Car that inherits from a parent class such as Vehicle demonstrates inheritance", "E. An object encapsulates both data (properties) and behavior (methods)"], "answer": "A, B, D, E", "why": "C is backwards: encapsulating state and methods in classes is what object-oriented programming does." },
-            { "q": "74. True or False: in grep 'd..m' /etc/passwd, each dot matches exactly one character, so it finds daem in daemon and dnsm in dnsmasq.", "options": ["A. True", "B. False"], "answer": "A", "why": ". matches any single character, so d..m is a four-character pattern." },
-            { "q": "75. Multiple answer - grep commands and regex behaviour:", "options": ["A. grep 'new*' /etc/passwd only matches the exact four-letter word news", "B. grep 'd..m' /etc/passwd uses dots as wildcards to match patterns like daem and dnsm", "C. grep '^root' /etc/passwd uses ^ to match root only at the beginning of a line", "D. grep 'false$' /etc/passwd uses $ to match lines where false is at the end"], "answer": "B, C, D", "why": "A is wrong because * repeats the preceding w zero or more times, so new* also matches plain ne." },
-            { "q": "76. True or False: in vi, pressing a in command mode inserts text at the cursor's current position.", "options": ["A. True", "B. False"], "answer": "B", "why": "a appends after the cursor. i is the key that inserts at the current position." },
-            { "q": "77. Multiple answer - package administration on the DEVASC VM:", "options": ["A. apt-cache search speed test searches package descriptions locally without needing administrative privileges", "B. sudo apt-get purge speedtest-cli removes the package along with its configuration files", "C. Installing a new package requires root access via sudo apt-get install <package_name>", "D. sudo apt-get update updates all installed packages to their latest versions"], "answer": "A, B, C", "why": "D is wrong: update only refreshes the list of available packages. upgrade is what installs the newer versions." }
-        ];
-
-        // Utility to shuffle an array (Fisher-Yates)
-        function shuffleArray(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
-
-        function renderQuiz() {
-            const container = document.getElementById('quiz-container');
-            container.innerHTML = ''; // Clear container
-            
-            // Randomize questions
-            const shuffledQuestions = shuffleArray([...originalQuizData]);
-
-            shuffledQuestions.forEach((item, index) => {
-                // Create Card Container
-                const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all";
-                card.dataset.answered = "false";
-
-                // Question Text
-                const questionText = document.createElement('h2');
-                questionText.className = "text-lg font-semibold mb-4 leading-relaxed text-slate-800";
-                // Strip the original numbering and apply our own dynamic numbering
-                const rawQ = item.q.replace(/^\d+\.\s*/, ''); 
-                questionText.textContent = `${index + 1}. ${rawQ}`;
-                card.appendChild(questionText);
-
-                // Options Container
-                const optionsDiv = document.createElement('div');
-                optionsDiv.className = "flex flex-col gap-3 options-container";
-
-                // Map answers string to an array of correct letters (e.g., "A, C, D" -> ["A", "C", "D"])
-                const correctLetters = item.answer.split(',').map(s => s.trim());
-
-                item.options.forEach((optText, optIndex) => {
-                    const optBtn = document.createElement('button');
-                    optBtn.className = "text-left w-full p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer text-slate-700 bg-white group";
-                    
-                    const optContent = document.createElement('span');
-                    optContent.className = "block group-hover:translate-x-1 transition-transform duration-200";
-                    optContent.textContent = optText;
-                    
-                    optBtn.appendChild(optContent);
-
-                    // Click Event
-                    optBtn.addEventListener('click', () => {
-                        handleOptionClick(card, item, correctLetters, optIndex, optionsDiv);
-                    });
-
-                    optionsDiv.appendChild(optBtn);
-                });
-
-                card.appendChild(optionsDiv);
-
-                // Explanation Container (Hidden by default)
-                const explanationDiv = document.createElement('div');
-                explanationDiv.className = "explanation hidden mt-6 p-4 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg text-slate-600 italic text-sm";
-                explanationDiv.innerHTML = `<strong class="not-italic text-slate-700 block mb-1">Explanation:</strong> ${item.why}`;
-                card.appendChild(explanationDiv);
-
-                container.appendChild(card);
-            });
-            
-            // Scroll to top on reset
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function handleOptionClick(card, itemData, correctLetters, selectedIndex, optionsDiv) {
-            // Prevent multiple clicks on the same question
-            if (card.dataset.answered === "true") return;
-            card.dataset.answered = "true";
-
-            const optionButtons = optionsDiv.children;
-
-            for (let i = 0; i < optionButtons.length; i++) {
-                const btn = optionButtons[i];
-                const optText = itemData.options[i];
-                // Extract the letter from the option text (e.g. "A. ..." -> "A")
-                const optLetter = optText.charAt(0);
-                const isCorrect = correctLetters.includes(optLetter);
-                const isSelected = (i === selectedIndex);
-
-                // Remove hover and pointer effects
-                btn.classList.remove('hover:bg-slate-50', 'cursor-pointer');
-                btn.classList.add('cursor-default');
-                const spanInner = btn.querySelector('span');
-                spanInner.classList.remove('group-hover:translate-x-1');
-
-                // Apply logic colors
-                if (isCorrect) {
-                    // Correct answers are highlighted in green
-                    btn.classList.remove('bg-white', 'border-slate-200', 'text-slate-700');
-                    btn.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-800', 'ring-1', 'ring-emerald-500');
-                    
-                    // Add check icon
-                    spanInner.innerHTML = `<span class="font-bold mr-1">✓</span> ${optText}`;
-                } else if (isSelected && !isCorrect) {
-                    // Incorrect selected answer is highlighted in red
-                    btn.classList.remove('bg-white', 'border-slate-200', 'text-slate-700');
-                    btn.classList.add('bg-red-50', 'border-red-500', 'text-red-800');
-                    
-                    // Add cross icon
-                    spanInner.innerHTML = `<span class="font-bold mr-1">✗</span> ${optText}`;
-                } else {
-                    // Unselected wrong options fade out slightly
-                    btn.classList.add('opacity-50');
-                }
-            }
-
-            // Reveal the explanation block
-            const explanationDiv = card.querySelector('.explanation');
-            explanationDiv.classList.remove('hidden');
-            
-            // Add a subtle border highlight to the card based on whether they got it completely right
-            const clickedLetter = itemData.options[selectedIndex].charAt(0);
-            if(correctLetters.includes(clickedLetter) && correctLetters.length === 1) {
-                 card.classList.add('border-emerald-300', 'shadow-emerald-100');
-            } else if (!correctLetters.includes(clickedLetter)){
-                 card.classList.add('border-red-300', 'shadow-red-100');
-            } else {
-                 // For multi-select, if they clicked one of the correct ones, we'll mark as partial/correct visually on card border
-                 card.classList.add('border-blue-300', 'shadow-blue-100');
-            }
-        }
-
-        // Reset Button listener
-        document.getElementById('reset-btn').addEventListener('click', renderQuiz);
-
-        // Initialize quiz on load
-        window.addEventListener('DOMContentLoaded', renderQuiz);
-
-    </script>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ITPEC FE Subject A Reviewer</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--tx:#1f2328;--mut:#6b7280;--bd:#dcdad2;--ac:#2f5fd0;--ok:#e3f4e6;--okb:#2e8b45;--no:#fbe4e4;--nob:#c0392b}
+@media(prefers-color-scheme:dark){:root{--bg:#16181c;--card:#20242a;--tx:#e8eaed;--mut:#9aa3ad;--bd:#343a42;--ac:#7ea2ff;--ok:#1d3a26;--okb:#4cc26a;--no:#40201f;--nob:#ff7b6e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,sans-serif}
+.w{max-width:820px;margin:0 auto;padding:20px 14px 60px}
+h1{font-size:1.4rem;margin:0 0 4px}.sub{color:var(--mut);font-size:.9rem;margin-bottom:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.tab,.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit}
+.tab.on{background:var(--ac);color:#fff;border-color:var(--ac)}.btn{margin-left:auto}
+.score{color:var(--mut);font-size:.9rem;margin-bottom:12px}
+.q{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px}
+.qt{font-weight:600;margin:0 0 12px}.qn{color:var(--ac)}
+.o{display:block;width:100%;text-align:left;border:1px solid var(--bd);background:transparent;color:var(--tx);padding:10px 12px;margin:6px 0;border-radius:8px;cursor:pointer;font:inherit}
+.o:hover:not(:disabled){border-color:var(--ac)}.o:disabled{cursor:default}
+.o.ok{background:var(--ok);border-color:var(--okb)}.o.no{background:var(--no);border-color:var(--nob)}
+.ex{margin-top:12px;border-top:1px dashed var(--bd);padding-top:10px;font-size:.93rem}
+.ex p{margin:6px 0}.g{color:var(--okb);font-weight:600}.r{color:var(--nob);font-weight:600}
+</style></head><body><div class="w">
+<h1>ITPEC Fundamental IT Engineer – Subject A</h1>
+<div class="sub">Click an answer to see the correct one with a full explanation.</div>
+<div class="bar" id="tabs"></div>
+<div class="score" id="score"></div>
+<div id="list"></div>
+</div>
+<script src="questions-2025S.js"></script>
+<script src="questions-2025A.js"></script>
+<script src="questions-2026S.js"></script>
+<script>
+const D={
+"2025S_FE-A_Questions.pdf":[
+{n:1,t:"For an 8-bit binary integer, which operation extracts the most significant 4 bits while making the other bits zero?",o:["Bitwise AND with 11110000","Bitwise NAND with 11110000","Bitwise OR with 00001111","Bitwise XOR with 00001111"],a:0,e:["AND with 1 keeps a bit; AND with 0 clears it. The mask 11110000 keeps the upper four bits and zeroes the lower four. Example: 10110101 AND 11110000 = 10110000.","NAND is the inverse of AND, so the kept bits come out flipped and the cleared bits become 1. The upper four bits would be inverted and the lower four set to 1.","OR with 00001111 forces the lower four bits to 1 and leaves the upper four unchanged. The lower bits are not zero, so this fails.","XOR with 00001111 flips the lower four bits and leaves the upper four as they are. The lower bits are not zero, so this fails."]},
+{n:8,t:"A CPU with an 800 MHz clock executes one instruction in an average of 4 clock cycles. What is its performance in MIPS?",o:["0.2","20","200","3,200"],a:2,e:["Wrong: 0.2 is off by a factor of 1,000.","Wrong: 20 is off by a factor of 10.","Correct: 800 MHz = 800 million cycles/s. Dividing by 4 cycles per instruction gives 200 million instructions/s = 200 MIPS.","Wrong: 3,200 comes from multiplying 800 by 4 instead of dividing. More cycles per instruction lowers performance, not raises it."]},
+{n:12,t:"Two processing devices each have availability 0.9. What is the difference in availability between (1) the system works if at least one device runs and (2) it works only if both run?",o:["0.09","0.10","0.18","0.19"],a:2,e:["Wrong: 0.09 is just 0.9 × 0.1, a partial term and not the difference.","Wrong: 0.10 is the failure probability of one device, not a difference between the two conditions.","Correct: Condition (1), parallel: 1 − (0.1 × 0.1) = 0.99. Condition (2), series: 0.9 × 0.9 = 0.81. Difference = 0.99 − 0.81 = 0.18.","Wrong: 0.19 would be 1 − 0.81, the probability that at least one fails. That is not the difference of the two availabilities."]},
+{n:23,t:"Which is the most appropriate information for a router to determine the destination of an incoming packet?",o:["Destination IP address","Destination MAC address","Source IP address","Source MAC address"],a:0,e:["Correct: Routers work at the network layer. They look up the destination IP address in the routing table to pick the next hop.","Wrong: MAC addresses are data-link information that is rewritten at every hop. Switches and bridges use them, not routers, to decide where to forward.","Wrong: The source IP identifies the sender, which matters for replies, filtering and logging, but not for deciding where the packet goes.","Wrong: The source MAC is only the previous hop on this link and has no bearing on the route."]},
+{n:25,t:"Which is an appropriate explanation of Address Resolution Protocol (ARP)?",o:["It converts MAC addresses into IP addresses","It resolves domain names into IP addresses","It resolves IP addresses into the corresponding MAC addresses","It translates IPv4 addresses into IPv6 addresses"],a:2,e:["Wrong: This is the reverse direction (RARP). ARP goes from IP to MAC.","Wrong: Resolving domain names to IPs is the job of DNS.","Correct: ARP broadcasts a request such as “who has 192.168.1.10?” and the owner replies with its MAC address, which the sender needs to build the Ethernet frame.","Wrong: Translating between IPv4 and IPv6 is done by mechanisms such as NAT64 or tunneling, not ARP."]},
+{n:60,t:"Company A bought a machine for $126,000 with a salvage value of $6,000 after 6 years. What is the annual depreciation expense using the straight-line method?",o:["12,000","20,000","21,000","36,000"],a:1,e:["Wrong: 12,000 does not match any correct step of the formula.","Correct: Straight-line = (cost − salvage) / life = (126,000 − 6,000) / 6 = 20,000 per year.","Wrong: 21,000 is 126,000 / 6, which forgets to subtract the salvage value.","Wrong: 36,000 would be 6,000 × 6, which is meaningless here."]}
+],
+"2025A_FE-A_Questions.pdf":[
+{n:2,t:"Let n be a two’s complement binary integer. Which operation yields 9 × n using only bit shifting and one addition or subtraction?",o:["Shift n left 2 bits, then add n","Shift n left 2 bits, then subtract n","Shift n left 3 bits, then add n","Shift n left 3 bits, then subtract n"],a:2,e:["Wrong: Left shift by 2 multiplies by 4, so 4n + n = 5n.","Wrong: 4n − n = 3n.","Correct: Left shift by 3 multiplies by 8, so 8n + n = 9n. This works for two’s complement as well.","Wrong: 8n − n = 7n."]},
+{n:13,t:"Five processes A–E arrive together in that order with running times 10, 6, 2, 8 and 4 ms. What is the average turnaround time under FCFS?",o:["14","19.2","20","22"],a:2,e:["Wrong: 14 is not what FCFS produces for this order.","Wrong: 19.2 would come from a shortest-job-first style ordering, not arrival order.","Correct: Completion times in arrival order are 10, 16, 18, 26, 30. Sum = 100, and 100 / 5 = 20 ms.","Wrong: 22 is not the average of these completion times."]},
+{n:15,t:"Main memory holds three pages, and pages are referenced in the order 1, 2, 3, 2, 1, 4, 5. With LRU, which page is replaced at the last reference (5)?",o:["1","2","3","4"],a:1,e:["Wrong: Page 1 was used just before page 4, so it is more recent than 2.","Correct: After 1, 2, 3, 2, 1 memory holds {1, 2, 3}. Reference 4 evicts 3 (least recently used), giving {1, 2, 4}. Reference 5 then evicts the least recently used of those: 2 was last used before 1 and 4, so 2 is replaced.","Wrong: Page 3 was already evicted when 4 was loaded, so it is not in memory at reference 5.","Wrong: Page 4 was just loaded and is the most recently used."]},
+{n:22,t:"In transaction management, which condition does the Isolation property ensure?",o:["Data is written permanently after a transaction","Only valid data is written to the database","Transactions are either fully completed or revoked","Transactions are executed without affecting each other"],a:3,e:["Wrong: Permanence of committed data is Durability.","Wrong: Moving the database from one valid state to another is Consistency.","Wrong: All-or-nothing execution is Atomicity.","Correct: Isolation means concurrent transactions do not interfere. Each behaves as if it ran alone, usually enforced with locking."]},
+{n:42,t:"A project costs $70,000 normally, $50,000 in the best case and $120,000 in the worst case. What is the PERT three-point expected cost?",o:["70,000","75,000","80,000","85,000"],a:1,e:["Wrong: 70,000 is only the most likely value and ignores the other two estimates.","Correct: PERT = (optimistic + 4 × most likely + pessimistic) / 6 = (50,000 + 280,000 + 120,000) / 6 = 450,000 / 6 = 75,000.","Wrong: 80,000 does not follow from the formula. It is not the simple average either, which is about 80,000 only by coincidence of equal weights.","Wrong: 85,000 is the midpoint of best and worst case, which ignores the weight on the most likely value."]},
+{n:43,t:"An SLA covers 7 AM–11 PM on 30 business days a month with availability of 99% or more. What is the maximum downtime in hours?",o:["1.2","3.0","4.8","7.2"],a:2,e:["Wrong: 1.2 is too small.","Wrong: 3.0 does not match the service hours.","Correct: Service time = 16 h × 30 days = 480 h. Allowed downtime = 1% × 480 = 4.8 h.","Wrong: 7.2 would be 1.5% of 480 h, or wrongly uses 24 h days."]}
+],
+"2026S_FE-A_Questions.pdf":[
+{n:2,t:"What is the decimal equivalent of the octal number 1234.2?",o:["27.0","668.25","1542.5","5346.0"],a:1,e:["Wrong: 27.0 is not a valid expansion of these digits.","Correct: 1×8³ + 2×8² + 3×8 + 4 = 512 + 128 + 24 + 4 = 668. The fraction .2 octal = 2/8 = 0.25. Total 668.25.","Wrong: 1542.5 comes from reading the digits with the wrong base, such as decimal 1234 converted incorrectly.","Wrong: 5346.0 ignores the fractional part and uses incorrect weights."]},
+{n:7,t:"F(x, y) = F(y, x mod y) when y > 0, and F(x, y) = x when y = 0. What is F(231, 15)?",o:["2","3","5","7"],a:1,e:["Wrong: 2 is not reached by the recursion.","Correct: F(231,15): 231 mod 15 = 6, so F(15,6). 15 mod 6 = 3, so F(6,3). 6 mod 3 = 0, so F(3,0) = 3. This is Euclid’s algorithm, so the result is gcd(231, 15) = 3.","Wrong: 5 divides 15 but not 231, so it cannot be the gcd.","Wrong: 7 divides 231 but not 15, so it cannot be the gcd."]},
+{n:14,t:"What is the CPU utilization (rounded, %) when three jobs, each with 30% average I/O wait, run on a single CPU?",o:["10","34","90","97"],a:3,e:["Wrong: 10 is not derived from the formula.","Wrong: 34 is roughly 0.3³ expressed oddly. The right quantity is the complement.","Wrong: 90 is 1 − 0.1, which misuses the wait fraction.","Correct: The CPU is idle only when all three jobs wait at once: 0.3³ = 0.027. Utilization = 1 − 0.027 = 0.973 ≈ 97%."]},
+{n:15,t:"P1, P2, P3, P4 need 5, 13, 4 and 8 ms and all arrive at time 0. With Round Robin and a 5 ms time slice, what is the average waiting time?",o:["7.5","10","11.5","19"],a:2,e:["Wrong: 7.5 is too low for this schedule.","Wrong: 10 does not match the totals.","Correct: Schedule: P1 0–5 (done), P2 5–10, P3 10–14 (done), P4 14–19, P2 19–24, P4 24–27 (done), P2 27–30 (done). Waiting = finish − burst: P1 0, P2 30−13 = 17, P3 14−4 = 10, P4 27−8 = 19. Sum 46 / 4 = 11.5 ms.","Wrong: 19 is only P4’s waiting time, not the average."]},
+{n:42,t:"A system is 500 FP at 10 FP per person-month. Installation and education take 10 person-months, and project management adds 10% of development + installation + education. How many person-months in total?",o:["51","60","65","66"],a:3,e:["Wrong: 51 adds only 10% of development and misses the rest.","Wrong: 60 is development + installation/education with no management effort.","Wrong: 65 applies 10% to only part of the base, or rounds wrongly.","Correct: Development = 500 / 10 = 50. Plus 10 = 60. Management = 10% × 60 = 6. Total = 66 person-months."]},
+{n:59,t:"To earn a $42,000 profit, how many units must be sold? Price $17, fixed costs $130,000 + $10,000, variable cost $3 + $4 per unit.",o:["14,000","18,200","26,000","26,200"],a:1,e:["Wrong: 14,000 divides only the fixed costs by the unit contribution and ignores the target profit.","Correct: Fixed costs = 140,000. Variable cost per unit = 7, so contribution = 17 − 7 = 10. Units = (140,000 + 42,000) / 10 = 18,200.","Wrong: 26,000 uses the wrong contribution margin, such as 7.","Wrong: 26,200 mixes up the margin as well as the target."]}
+]};
+for(const k in window.EXTRA||{})D[k]=D[k].concat(EXTRA[k]);for(const k in D)D[k].sort((a,b)=>a.n-b.n);
+let cur=Object.keys(D)[0],done={},showEx=true,open={};
+const $=s=>document.querySelector(s),L="abcd";
+function tabs(){$("#tabs").innerHTML="";Object.keys(D).forEach(k=>{const b=document.createElement("button");b.className="tab"+(k==cur?" on":"");b.textContent=k;b.onclick=()=>{cur=k;tabs();draw()};$("#tabs").append(b)});const s=document.createElement("button");s.className="btn";s.textContent="Shuffle questions";s.onclick=()=>{const a=D[cur];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}Object.keys(done).forEach(x=>{if(x.startsWith(cur))delete done[x]});draw()};$("#tabs").append(s);const h=document.createElement("button");h.className="tab";h.textContent=showEx?"Hide explanations":"Show explanations";h.onclick=()=>{showEx=!showEx;tabs();draw()};$("#tabs").append(h)}
+function draw(){const qs=D[cur],list=$("#list");list.innerHTML="";let c=0,t=0;
+qs.forEach((q,i)=>{const d=document.createElement("div");d.className="q";d.innerHTML=`<p class="qt"><span class="qn">Q${q.n}.</span> ${q.t}</p>`;
+q.o.forEach((o,k)=>{const b=document.createElement("button");b.className="o";b.textContent=L[k]+") "+o;b.onclick=()=>pick(q,d,k);d.append(b)});list.append(d);
+const key=cur+q.n;if(done[key]!==undefined)pick(q,d,done[key],true)});
+const fb=document.createElement("button");fb.className="tab on";fb.textContent="Finish and see summary";fb.onclick=summary;list.append(fb);const sm=document.createElement("div");sm.id="sum";sm.style.marginTop="16px";list.append(sm);upd()}
+function upd(){const qs=D[cur];let t=0,c=0;qs.forEach(q=>{const v=done[cur+q.n];if(v!==undefined){t++;if(v==q.a)c++}});$("#score").textContent=`${cur}: ${qs.length} of 60 questions loaded · answered ${t} · correct ${c}`}
+function pick(q,d,k,re){done[cur+q.n]=k;const bs=d.querySelectorAll(".o");
+bs.forEach((b,i)=>{b.disabled=true;if(i==q.a)b.classList.add("ok");else if(i==k)b.classList.add("no")});
+d.querySelector(".ex")?.remove();const ex=document.createElement("div");ex.className="ex";
+ex.innerHTML=`<p><b>${k==q.a?"Correct!":"Not quite."} The answer is ${L[q.a]}).</b></p>`+q.e.map((e,i)=>`<p><span class="${i==q.a?"g":"r"}">${L[i]}) ${i==q.a?"Right":"Wrong"}.</span> ${e.replace(/^(Correct|Wrong): /,"")}</p>`).join("");
+const key=cur+q.n,tb=document.createElement("button");tb.className="tab";tb.style.marginTop="8px";tb.textContent="Show explanation";tb.onclick=()=>{ex.style.display="block";tb.remove();open[key]=1};if(!showEx&&!open[key]){ex.style.display="none";d.append(tb)}d.append(ex);if(!re)upd()}
+function summary(){let T=0,C=0,A=0,h="<div class='q'><p class='qt'>Score summary</p>";for(const k in D){let a=0,c=0,m=[];D[k].forEach(q=>{const v=done[k+q.n];if(v!==undefined){a++;if(v==q.a)c++;else m.push("Q"+q.n)}});T+=D[k].length;C+=c;A+=a;h+=`<p><b>${k}</b><br>${c} correct of ${a} answered (${D[k].length} questions loaded)`+(m.length?`<br>Missed: ${m.join(", ")}`:"")+"</p>"}
+h+=`<p><b>Total: ${C} / ${A} answered</b>`+(A?` (${Math.round(100*C/A)}%)`:"")+`. Not yet answered: ${T-A}</p></div>`;$("#sum").innerHTML=h;$("#sum").scrollIntoView({behavior:"smooth"})}
+tabs();draw();
+</script></body></html>
